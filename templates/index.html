@@ -263,13 +263,20 @@
             margin-bottom: 25px;
         }
 
-        .status-indicator { display: flex; align-items: center; gap: 8px; min-width: 100px; }
+        .status-indicator { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            min-width: 90px;
+            flex-shrink: 0;
+        }
 
         .status-dot {
             width: 10px;
             height: 10px;
             border-radius: 50%;
             background: var(--text-muted);
+            flex-shrink: 0;
         }
 
         .status-dot.idle { background: var(--text-muted); }
@@ -283,7 +290,10 @@
             50% { opacity: 0.7; box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
         }
 
-        .progress-wrapper { flex: 1; }
+        .progress-wrapper { 
+            flex: 1; 
+            min-width: 150px;
+        }
 
         .progress-bar-bg {
             height: 6px;
@@ -303,13 +313,20 @@
         .current-item {
             font-size: 0.8rem;
             color: var(--text-muted);
-            max-width: 200px;
+            width: 180px;
+            min-width: 100px;
+            max-width: 180px;
+            flex-shrink: 1;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        .stats { display: flex; gap: 20px; }
+        .stats { 
+            display: flex; 
+            gap: 20px; 
+            flex-shrink: 0;
+        }
 
         .stat { text-align: center; }
         .stat-value { font-family: 'Orbitron', sans-serif; font-size: 1rem; color: var(--accent); }
@@ -374,10 +391,11 @@
             border-radius: 10px;
             overflow: hidden;
             border: 1px solid var(--border);
+            table-layout: fixed;
         }
 
         .trades-table th {
-            padding: 12px 14px;
+            padding: 12px 10px;
             text-align: left;
             background: rgba(0, 212, 255, 0.1);
             color: var(--accent);
@@ -388,17 +406,26 @@
         }
 
         .trades-table td {
-            padding: 10px 14px;
+            padding: 10px;
             border-bottom: 1px solid rgba(30, 58, 95, 0.4);
             font-size: 0.85rem;
         }
+
+        /* Column widths */
+        .trades-table th:nth-child(1), .trades-table td:nth-child(1) { width: 15%; } /* Item */
+        .trades-table th:nth-child(2), .trades-table td:nth-child(2) { width: 8%; }  /* Profit */
+        .trades-table th:nth-child(3), .trades-table td:nth-child(3) { width: 7%; }  /* Time */
+        .trades-table th:nth-child(4), .trades-table td:nth-child(4) { width: 9%; }  /* ISK/Hour */
+        .trades-table th:nth-child(5), .trades-table td:nth-child(5) { width: 5%; }  /* Jumps - thinner */
+        .trades-table th:nth-child(6), .trades-table td:nth-child(6) { width: 5%; }  /* Trips - thinner */
+        .trades-table th:nth-child(7), .trades-table td:nth-child(7) { width: 11%; } /* Amount */
+        .trades-table th:nth-child(8), .trades-table td:nth-child(8) { width: 40%; } /* Route - much wider */
 
         .trades-table tr:hover { background: var(--bg-card-hover); }
         .trades-table tr:last-child td { border-bottom: none; }
 
         .item-name {
             font-weight: 600;
-            max-width: 180px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -406,18 +433,19 @@
 
         .profit { color: var(--profit); font-weight: 700; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; }
         .isk-hour { color: #f472b6; font-weight: 700; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; }
-        .time-cell { color: var(--text-muted); font-family: 'Orbitron', sans-serif; font-size: 0.75rem; }
+        .time-cell { color: var(--text-muted); font-family: 'Orbitron', sans-serif; font-size: 0.75rem; white-space: nowrap; }
 
         .badge {
             display: inline-block;
-            padding: 2px 8px;
+            padding: 2px 6px;
             border-radius: 4px;
             font-size: 0.75rem;
+            white-space: nowrap;
         }
 
         .jumps-badge { background: rgba(139, 92, 246, 0.2); border: 1px solid rgba(139, 92, 246, 0.5); color: #a78bfa; }
         .trips-badge { background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.5); color: var(--warning); }
-        .amount-badge { background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.5); color: var(--profit); }
+        .amount-badge { background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.5); color: var(--profit); font-size: 0.7rem; }
         .single-trip-badge { background: rgba(0, 212, 255, 0.2); border: 1px solid rgba(0, 212, 255, 0.5); color: var(--accent); font-size: 0.7rem; }
 
         .efficiency-boost { color: var(--profit); font-size: 0.7rem; font-weight: 600; margin-left: 5px; }
@@ -427,8 +455,22 @@
         .trade-variant { background: rgba(0, 212, 255, 0.03); }
         .trade-variant td { border-left: 2px solid var(--accent); }
 
-        .route { font-size: 0.75rem; color: var(--text-muted); }
-        .route-arrow { color: var(--accent); margin: 0 4px; }
+        .route { 
+            font-size: 0.8rem; 
+            color: var(--text-muted); 
+        }
+        .route-station {
+            display: inline-block;
+            max-width: 42%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: middle;
+        }
+        .route-arrow { 
+            color: var(--accent); 
+            margin: 0 3px;
+        }
 
         .empty-state { text-align: center; padding: 50px; color: var(--text-muted); }
         .empty-state h3 { font-family: 'Orbitron', sans-serif; margin-bottom: 8px; font-size: 1rem; }
@@ -516,6 +558,10 @@
                             <div class="form-group">
                                 <label>Warp Full (AU/s)</label>
                                 <input type="number" id="warpFull" value="1.5" step="0.1" min="0.5">
+                            </div>
+                            <div class="form-group">
+                                <label>Max Time (minutes)</label>
+                                <input type="number" id="maxTime" value="" placeholder="No limit" step="5" min="1">
                             </div>
                         </div>
                         <div class="info-text">💡 Get values from EFT/Pyfa. Full = with cargo expanders.</div>
@@ -614,6 +660,7 @@
             <button class="sort-btn desc" data-sort="profit_per_jump">ISK/Jump <span class="sort-arrow">▼</span></button>
             <button class="sort-btn desc" data-sort="profit">Profit <span class="sort-arrow">▼</span></button>
             <button class="sort-btn desc" data-sort="isk_per_m3">ISK/m³ <span class="sort-arrow">▼</span></button>
+            <button class="sort-btn asc" data-sort="time_seconds" id="sortTime">Time <span class="sort-arrow">▼</span></button>
             <button class="sort-btn asc" data-sort="jumps">Jumps <span class="sort-arrow">▼</span></button>
             <button class="sort-btn asc" data-sort="trips">Trips <span class="sort-arrow">▼</span></button>
             <button class="sort-btn desc" data-sort="cost">Cost <span class="sort-arrow">▼</span></button>
@@ -689,6 +736,10 @@
         function getCargoCapacity() { return getInputValue('cargoCapacity', 830000); }
         function getBudget() { return getInputValue('maxBudget', Infinity); }
         function getMinProfit() { return getInputValue('minProfit', 10000000); }
+        function getMaxTime() {
+            const val = parseFloat(document.getElementById('maxTime').value);
+            return val > 0 ? val * 60 : Infinity; // Convert minutes to seconds
+        }
 
         function getShipStats() {
             return {
@@ -725,17 +776,20 @@
             const timeHeader = document.getElementById('timeHeader');
             const iskHourHeader = document.getElementById('iskHourHeader');
             const sortProfitHour = document.getElementById('sortProfitHour');
+            const sortTime = document.getElementById('sortTime');
             
             if (shipParamsEnabled) {
                 timeHeader.style.display = '';
                 iskHourHeader.style.display = '';
                 sortProfitHour.style.display = '';
+                sortTime.style.display = '';
             } else {
                 timeHeader.style.display = 'none';
                 iskHourHeader.style.display = 'none';
                 sortProfitHour.style.display = 'none';
-                // Switch sort if currently on profit_per_hour
-                if (currentSort === 'profit_per_hour') {
+                sortTime.style.display = 'none';
+                // Switch sort if currently on time-related sorts
+                if (currentSort === 'profit_per_hour' || currentSort === 'time_seconds') {
                     currentSort = 'profit_per_jump';
                     sortDirection = 'desc';
                     document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
@@ -1030,6 +1084,7 @@
                 const budget = getBudget();
                 const cargoCapacity = getCargoCapacity();
                 const shipStats = getShipStats();
+                const maxTime = getMaxTime();
                 
                 let allTrades = [];
                 rawTrades.forEach(trade => {
@@ -1038,6 +1093,11 @@
                         if (v.profit > 0) allTrades.push(v);
                     });
                 });
+                
+                // Filter by max time (if ship params enabled and max time set)
+                if (shipParamsEnabled && maxTime < Infinity) {
+                    allTrades = allTrades.filter(t => t.time_seconds <= maxTime);
+                }
                 
                 // Sort with direction
                 allTrades.sort((a, b) => {
@@ -1076,11 +1136,11 @@
                 const rowClass = isSingleTrip ? 'trade-variant' : '';
                 
                 let itemLabel = trade.type_name;
-                let tripsBadge = `<span class="badge trips-badge">${trade.trips}x</span>`;
+                let tripsBadge = `<span class="badge trips-badge">${trade.trips}</span>`;
                 
                 if (isSingleTrip) {
                     itemLabel = `<span class="variant-label">⚡ 1-TRIP</span> ${trade.type_name}`;
-                    tripsBadge = `<span class="badge single-trip-badge">1x</span><span class="efficiency-boost">+${trade.efficiency_boost.toFixed(0)}%</span>`;
+                    tripsBadge = `<span class="badge single-trip-badge">1</span><span class="efficiency-boost">+${trade.efficiency_boost.toFixed(0)}%</span>`;
                 } else if (trade.has_single_trip_option) {
                     itemLabel = `<span class="full-order-label">FULL</span> ${trade.type_name}`;
                 }
@@ -1094,13 +1154,13 @@
                     <td class="profit">${formatNumber(trade.profit)}</td>
                     ${timeCell}
                     ${iskHourCell}
-                    <td><span class="badge jumps-badge">${trade.jumps}j</span></td>
+                    <td><span class="badge jumps-badge">${trade.jumps}</span></td>
                     <td>${tripsBadge}</td>
-                    <td><span class="badge amount-badge">${trade.amount.toLocaleString()}${trade.original_amount > trade.amount ? '/' + trade.original_amount.toLocaleString() : ''}</span></td>
+                    <td><span class="badge amount-badge">${formatAmountCompact(trade.amount)}${trade.original_amount > trade.amount ? '/' + formatAmountCompact(trade.original_amount) : ''}</span></td>
                     <td class="route">
-                        <span title="${trade.from_station_name}">${truncate(trade.from_station_name, 15)}</span>
+                        <span class="route-station" title="${trade.from_station_name}">${trade.from_station_name}</span>
                         <span class="route-arrow">→</span>
-                        <span title="${trade.to_station_name}">${truncate(trade.to_station_name, 15)}</span>
+                        <span class="route-station" title="${trade.to_station_name}">${trade.to_station_name}</span>
                     </td>
                 </tr>
             `}).join('');
@@ -1109,6 +1169,12 @@
         function truncate(str, len) {
             if (!str) return 'Unknown';
             return str.length > len ? str.substring(0, len) + '...' : str;
+        }
+
+        function formatAmountCompact(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num.toString();
         }
 
         // ========== Input Formatting ==========
@@ -1166,7 +1232,7 @@
             });
 
             // Reload on settings change
-            ['maxBudget', 'cargoCapacity', 'alignEmpty', 'alignFull', 'warpEmpty', 'warpFull'].forEach(id => {
+            ['maxBudget', 'cargoCapacity', 'alignEmpty', 'alignFull', 'warpEmpty', 'warpFull', 'maxTime'].forEach(id => {
                 document.getElementById(id).addEventListener('change', loadTrades);
             });
 
