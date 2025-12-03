@@ -56,9 +56,11 @@ def init_db():
                 from_system_id INTEGER,
                 from_station_id INTEGER,
                 from_station_name TEXT,
+                from_security REAL,
                 to_system_id INTEGER,
                 to_station_id INTEGER,
                 to_station_name TEXT,
+                to_security REAL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
@@ -151,9 +153,9 @@ def insert_trade(trade_data):
             INSERT INTO trades 
             (type_id, type_name, buy_price, sell_price, amount, volume_m3,
              profit, profit_mil, isk_per_m3, jumps, trips, total_jumps, profit_per_jump,
-             from_system_id, from_station_id, from_station_name,
-             to_system_id, to_station_id, to_station_name)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             from_system_id, from_station_id, from_station_name, from_security,
+             to_system_id, to_station_id, to_station_name, to_security)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, trade_data)
         conn.commit()
 

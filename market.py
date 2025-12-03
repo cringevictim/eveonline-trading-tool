@@ -2,7 +2,7 @@ import aiohttp
 import asyncio
 import math
 from database import insert_orders_batch, insert_trade, clear_orders, clear_trades, get_db
-from pathfinder import batch_get_jumps, batch_get_routes_with_danger
+from pathfinder import batch_get_jumps
 
 # Security level thresholds
 SECURITY_LEVELS = {
@@ -32,8 +32,7 @@ class MarketScanner:
             'group_id': 533,
             'regions': ['highsec'],  # Which regions to include
             'route_flag': 'secure',   # shortest, secure, insecure
-            'trade_mode': 'instant',  # instant, buy_orders, sell_orders, patient
-            'check_camps': False      # Check for gate camps
+            'trade_mode': 'instant'   # instant, buy_orders, sell_orders, patient
         }
     
     def get_min_security(self):
@@ -248,20 +247,13 @@ class MarketScanner:
         # Collect unique routes
         route_pairs = list(set((t['origin'], t['dest']) for t in potential_trades))
         
-        # Get jumps with optional danger check
-        check_camps = self.settings.get('check_camps', False)
-        if check_camps:
-            route_results = await batch_get_routes_with_danger(route_pairs, route_flag, check_camps)
-            route_data = {route_pairs[i]: route_results[i] for i in range(len(route_pairs))}
-        else:
-            jumps_results = await batch_get_jumps(route_pairs, route_flag)
-            route_data = {route_pairs[i]: {'jumps': jumps_results[i], 'danger': 0} for i in range(len(route_pairs))}
+        # Get jumps for all routes
+        jumps_results = await batch_get_jumps(route_pairs, route_flag)
+        route_data = {route_pairs[i]: jumps_results[i] for i in range(len(route_pairs))}
         
         # Process trades with route data
         for trade in potential_trades:
-            route_info = route_data.get((trade['origin'], trade['dest']), {})
-            jumps = route_info.get('jumps')
-            danger = route_info.get('danger', 0)
+            jumps = route_data.get((trade['origin'], trade['dest']))
             
             if jumps is None or isinstance(jumps, Exception):
                 continue
@@ -288,9 +280,11 @@ class MarketScanner:
                 trade['origin'],
                 trade['origin_station'],
                 trade['origin_name'],
+                trade.get('origin_security', 0),
                 trade['dest'],
                 trade['dest_station'],
-                trade['dest_name']
+                trade['dest_name'],
+                trade.get('dest_security', 0)
             )
             insert_trade(trade_data)
     
@@ -316,9 +310,11 @@ class MarketScanner:
                     'origin': sell['system_id'],
                     'origin_station': sell['station_id'],
                     'origin_name': sell['station_name'],
+                    'origin_security': sell.get('security', 0),
                     'dest': buy['system_id'],
                     'dest_station': buy['station_id'],
-                    'dest_name': buy['station_name']
+                    'dest_name': buy['station_name'],
+                    'dest_security': buy.get('security', 0)
                 })
         return trades
     
@@ -359,9 +355,11 @@ class MarketScanner:
                     'origin': sell['system_id'],
                     'origin_station': sell['station_id'],
                     'origin_name': sell['station_name'] + ' (Buy Order)',
+                    'origin_security': sell.get('security', 0),
                     'dest': buy['system_id'],
                     'dest_station': buy['station_id'],
-                    'dest_name': buy['station_name']
+                    'dest_name': buy['station_name'],
+                    'dest_security': buy.get('security', 0)
                 })
         return trades
     
@@ -400,9 +398,11 @@ class MarketScanner:
                     'origin': sell['system_id'],
                     'origin_station': sell['station_id'],
                     'origin_name': sell['station_name'],
+                    'origin_security': sell.get('security', 0),
                     'dest': buy['system_id'],
                     'dest_station': buy['station_id'],
-                    'dest_name': buy['station_name'] + ' (Sell Order)'
+                    'dest_name': buy['station_name'] + ' (Sell Order)',
+                    'dest_security': buy.get('security', 0)
                 })
         return trades
     
@@ -448,22 +448,23 @@ class MarketScanner:
                     'origin': sell['system_id'],
                     'origin_station': sell['station_id'],
                     'origin_name': sell['station_name'] + ' (Buy Order)',
+                    'origin_security': sell.get('security', 0),
                     'dest': buy['system_id'],
                     'dest_station': buy['station_id'],
-                    'dest_name': buy['station_name'] + ' (Sell Order)'
+                    'dest_name': buy['station_name'] + ' (Sell Order)',
+                    'dest_security': buy.get('security', 0)
                 })
         return trades
 
 # Global scanner instance
 scanner = MarketScanner()
 
-def run_scan(group_id, min_profit, cargo_capacity, regions, route_flag, trade_mode, check_camps):
+def run_scan(group_id, min_profit, cargo_capacity, regions, route_flag, trade_mode):
     """Run a market scan (called from Flask)"""
     scanner.settings['cargo_capacity'] = cargo_capacity
     scanner.settings['regions'] = regions
     scanner.settings['route_flag'] = route_flag
     scanner.settings['trade_mode'] = trade_mode
-    scanner.settings['check_camps'] = check_camps
     
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)

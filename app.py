@@ -1,10 +1,13 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, redirect, session, url_for
 from threading import Thread
+import secrets
 from database import init_db, get_top_trades, get_scan_stats
 from market import run_scan, get_scanner_status, scanner
-from pathfinder import preload_routes_from_db, clear_gate_camp_cache
+from pathfinder import preload_routes_from_db
+import eve_sso
 
 app = Flask(__name__)
+app.secret_key = secrets.token_hex(32)  # For session management
 
 # Market group presets
 MARKET_GROUPS = {
@@ -37,10 +40,264 @@ scan_thread = None
 
 @app.route('/')
 def index():
+    # Check if user is logged in
+    character = None
+    if 'character_id' in session and 'access_token' in session:
+        character = {
+            'id': session.get('character_id'),
+            'name': session.get('character_name'),
+            'portrait': session.get('portrait')
+        }
+    
     return render_template('index.html', 
                          groups=MARKET_GROUPS,
                          route_options=ROUTE_OPTIONS,
-                         trade_modes=TRADE_MODES)
+                         trade_modes=TRADE_MODES,
+                         character=character)
+
+
+# ========== EVE SSO Routes ==========
+
+@app.route('/login')
+def login():
+    """Initiate EVE SSO login"""
+    state = secrets.token_urlsafe(16)
+    code_verifier = eve_sso.generate_code_verifier()
+    
+    # Store in session for callback verification
+    session['oauth_state'] = state
+    session['code_verifier'] = code_verifier
+    
+    auth_url = eve_sso.get_auth_url(state, code_verifier)
+    return redirect(auth_url)
+
+
+@app.route('/callback')
+def callback():
+    """Handle SSO callback"""
+    code = request.args.get('code')
+    state = request.args.get('state')
+    
+    # Verify state
+    if state != session.get('oauth_state'):
+        return "Invalid state parameter", 400
+    
+    # Exchange code for token
+    code_verifier = session.get('code_verifier')
+    token_data = eve_sso.exchange_code_for_token(code, code_verifier)
+    
+    if not token_data:
+        return "Failed to get access token", 400
+    
+    # Verify token and get character info
+    char_info = eve_sso.verify_token(token_data['access_token'])
+    if not char_info:
+        return "Failed to verify token", 400
+    
+    # Extract character ID (handle both formats)
+    char_id = char_info.get('CharacterID')
+    if not char_id and 'sub' in char_info:
+        char_id = int(char_info['sub'].split(':')[2])
+    
+    char_name = char_info.get('CharacterName') or char_info.get('name', 'Unknown')
+    
+    # Get character portrait
+    portrait = eve_sso.get_character_portrait(char_id)
+    portrait_url = portrait.get('px128x128') if portrait else None
+    
+    # Store in session
+    session['access_token'] = token_data['access_token']
+    session['refresh_token'] = token_data['refresh_token']
+    session['character_id'] = char_id
+    session['character_name'] = char_name
+    session['portrait'] = portrait_url
+    
+    # Clean up OAuth state
+    session.pop('oauth_state', None)
+    session.pop('code_verifier', None)
+    
+    return redirect('/')
+
+
+@app.route('/logout')
+def logout():
+    """Log out and clear session"""
+    session.clear()
+    return redirect('/')
+
+
+@app.route('/api/character')
+def get_character():
+    """Get current character info (basic)"""
+    if 'character_id' not in session:
+        return jsonify({'logged_in': False})
+    
+    char_id = session['character_id']
+    access_token = session['access_token']
+    
+    try:
+        info = eve_sso.get_full_character_info(char_id, access_token)
+        info['logged_in'] = True
+        return jsonify(info)
+    except Exception as e:
+        return try_refresh_and_retry(lambda token: eve_sso.get_full_character_info(char_id, token), e)
+
+
+@app.route('/api/character/status')
+def get_character_status():
+    """Get full character status for status panel"""
+    if 'character_id' not in session:
+        return jsonify({'logged_in': False})
+    
+    char_id = session['character_id']
+    access_token = session['access_token']
+    
+    try:
+        status = eve_sso.get_full_character_status(char_id, access_token)
+        status['logged_in'] = True
+        return jsonify(status)
+    except Exception as e:
+        return try_refresh_and_retry(lambda token: eve_sso.get_full_character_status(char_id, token), e)
+
+
+@app.route('/api/character/ship')
+def get_character_ship():
+    """Get current ship stats"""
+    if 'character_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    char_id = session['character_id']
+    access_token = session['access_token']
+    
+    def get_ship_data(token):
+        ship = eve_sso.get_character_ship(char_id, token)
+        if ship:
+            ship_type_id = ship.get('ship_type_id')
+            attrs = eve_sso.get_ship_attributes(ship_type_id)
+            ship_type = eve_sso.get_ship_type_info(ship_type_id)
+            
+            return {
+                'ship_type_id': ship_type_id,
+                'ship_name': ship.get('ship_name', 'Unknown'),
+                'ship_type_name': ship_type.get('name', 'Unknown') if ship_type else 'Unknown',
+                'cargo': attrs.get('capacity', 0) if attrs else 0,
+                'align_time': round(attrs.get('align_time', 10), 1) if attrs else 10,
+                'warp_speed': round(attrs.get('warp_speed', 3.0), 2) if attrs else 3.0
+            }
+        return None
+    
+    try:
+        result = get_ship_data(access_token)
+        if result:
+            return jsonify(result)
+        return jsonify({'error': 'No ship data'}), 404
+    except Exception as e:
+        return try_refresh_and_retry(get_ship_data, e)
+
+
+@app.route('/api/character/transactions')
+def get_transactions():
+    """Get recent wallet transactions"""
+    if 'character_id' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    char_id = session['character_id']
+    access_token = session['access_token']
+    
+    try:
+        transactions = eve_sso.get_wallet_transactions(char_id, access_token)
+        return jsonify(transactions[:20])  # Last 20
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+def try_refresh_token():
+    """Attempt to refresh the access token"""
+    refresh_token = session.get('refresh_token')
+    if refresh_token:
+        new_tokens = eve_sso.refresh_access_token(refresh_token)
+        if new_tokens:
+            session['access_token'] = new_tokens['access_token']
+            session['refresh_token'] = new_tokens['refresh_token']
+            return new_tokens['access_token']
+    return None
+
+def try_refresh_and_retry(func, original_error):
+    """Helper to refresh token and retry"""
+    print(f"API call failed, attempting token refresh: {original_error}")
+    new_token = try_refresh_token()
+    if new_token:
+        try:
+            result = func(new_token)
+            if isinstance(result, dict):
+                result['logged_in'] = True
+            return jsonify(result)
+        except Exception as e:
+            print(f"Retry also failed: {e}")
+    
+    return jsonify({'logged_in': False, 'error': 'Token expired, please re-login', 'needs_reauth': True})
+
+
+@app.route('/api/set_destination', methods=['POST'])
+def set_destination():
+    """Set autopilot destination in-game"""
+    if 'access_token' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    data = request.json
+    station_id = data.get('station_id')
+    route_flag = data.get('route_flag', 'secure')
+    
+    if not station_id:
+        return jsonify({'error': 'No station ID provided'}), 400
+    
+    def try_set_waypoint(token):
+        return eve_sso.set_waypoint(station_id, token, route_flag)
+    
+    success = try_set_waypoint(session['access_token'])
+    
+    if success:
+        return jsonify({'status': 'success'})
+    else:
+        # Try refresh
+        new_token = try_refresh_token()
+        if new_token:
+            success = try_set_waypoint(new_token)
+            if success:
+                return jsonify({'status': 'success'})
+        return jsonify({'error': 'Failed to set destination', 'needs_reauth': True}), 500
+
+
+@app.route('/api/open_market', methods=['POST'])
+def open_market():
+    """Open market window for an item"""
+    if 'access_token' not in session:
+        return jsonify({'error': 'Not logged in'}), 401
+    
+    data = request.json
+    type_id = data.get('type_id')
+    
+    if not type_id:
+        return jsonify({'error': 'No type ID provided'}), 400
+    
+    def try_open_market(token):
+        return eve_sso.open_market_window(type_id, token)
+    
+    success = try_open_market(session['access_token'])
+    
+    if success:
+        return jsonify({'status': 'success'})
+    else:
+        # Try refresh
+        new_token = try_refresh_token()
+        if new_token:
+            success = try_open_market(new_token)
+            if success:
+                return jsonify({'status': 'success'})
+        return jsonify({'error': 'Failed to open market', 'needs_reauth': True}), 500
+
+
+# ========== Market Scan Routes ==========
 
 @app.route('/api/scan', methods=['POST'])
 def start_scan():
@@ -56,25 +313,22 @@ def start_scan():
     regions = data.get('regions', ['highsec'])
     route_flag = data.get('route_flag', 'secure')
     trade_mode = data.get('trade_mode', 'instant')
-    check_camps = data.get('check_camps', False)
-    
-    # Clear gate camp cache if checking camps
-    if check_camps:
-        clear_gate_camp_cache()
     
     # Run scan in background thread
     scan_thread = Thread(target=run_scan, args=(
-        group_id, min_profit, cargo, regions, route_flag, trade_mode, check_camps
+        group_id, min_profit, cargo, regions, route_flag, trade_mode
     ))
     scan_thread.start()
     
     return jsonify({'status': 'started'})
+
 
 @app.route('/api/status')
 def get_status():
     status = get_scanner_status()
     stats = get_scan_stats()
     return jsonify({**status, **stats})
+
 
 @app.route('/api/trades')
 def get_trades():
@@ -83,10 +337,12 @@ def get_trades():
     trades = get_top_trades(limit, sort_by)
     return jsonify(trades)
 
+
 @app.route('/api/stop')
 def stop_scan():
     scanner.status = 'stopped'
     return jsonify({'status': 'stopped'})
+
 
 if __name__ == '__main__':
     print("Initializing database...")

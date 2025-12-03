@@ -125,6 +125,12 @@
             gap: 15px;
         }
 
+        .form-grid-5 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+        }
+
         .form-group {
             display: flex;
             flex-direction: column;
@@ -132,6 +138,26 @@
         }
 
         .form-group.span-2 { grid-column: span 2; }
+
+        .checkbox-col {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding-top: 2px;
+        }
+
+        /* Security status dots */
+        .sec-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 4px;
+            flex-shrink: 0;
+        }
+        .sec-dot.highsec { background: var(--highsec); }
+        .sec-dot.lowsec { background: var(--lowsec); }
+        .sec-dot.nullsec { background: var(--nullsec); }
 
         label {
             font-weight: 600;
@@ -218,6 +244,31 @@
         .toggle.active::after { left: 20px; background: var(--bg-dark); }
 
         .info-text { font-size: 0.7rem; color: var(--text-muted); margin-top: 8px; }
+
+        .sync-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .sync-btn-inline {
+            flex: 1;
+            padding: 6px 10px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            color: var(--text-muted);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sync-btn-inline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
 
         /* Scan Button */
         .scan-btn-wrapper { margin-bottom: 25px; }
@@ -332,56 +383,6 @@
         .stat-value { font-family: 'Orbitron', sans-serif; font-size: 1rem; color: var(--accent); }
         .stat-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; }
 
-        /* Sort Controls */
-        .sort-controls {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 15px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .sort-label { color: var(--text-muted); font-size: 0.85rem; margin-right: 5px; }
-
-        .sort-btn {
-            padding: 6px 12px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 5px;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-family: 'Rajdhani', sans-serif;
-            font-weight: 600;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .sort-btn:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-
-        .sort-btn.active {
-            border-color: var(--accent);
-            color: var(--accent);
-            background: rgba(0, 212, 255, 0.1);
-        }
-
-        .sort-arrow {
-            font-size: 0.7rem;
-            opacity: 0;
-            transition: all 0.2s;
-        }
-
-        .sort-btn.active .sort-arrow {
-            opacity: 1;
-        }
-
-        .sort-btn.desc .sort-arrow { transform: rotate(0deg); }
-        .sort-btn.asc .sort-arrow { transform: rotate(180deg); }
 
         /* Table */
         .trades-table {
@@ -395,34 +396,67 @@
         }
 
         .trades-table th {
-            padding: 12px 10px;
+            padding: 10px 8px;
             text-align: left;
             background: rgba(0, 212, 255, 0.1);
-            color: var(--accent);
+            color: var(--text-muted);
             font-weight: 600;
             text-transform: uppercase;
-            font-size: 0.7rem;
-            letter-spacing: 1px;
+            font-size: 0.65rem;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
         }
+
+        .trades-table th.sortable {
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+        }
+
+        .trades-table th.sortable:hover {
+            color: var(--accent);
+            background: rgba(0, 212, 255, 0.15);
+        }
+
+        .trades-table th.sortable.active {
+            color: var(--accent);
+        }
+
+        .trades-table th .sort-arrow {
+            opacity: 0;
+            margin-left: 3px;
+            font-size: 0.6rem;
+        }
+
+        .trades-table th.sortable.active .sort-arrow {
+            opacity: 1;
+        }
+
+        .trades-table th.sortable.desc .sort-arrow { display: inline; }
+        .trades-table th.sortable.asc .sort-arrow { display: inline; transform: rotate(180deg); }
 
         .trades-table td {
-            padding: 10px;
+            padding: 8px;
             border-bottom: 1px solid rgba(30, 58, 95, 0.4);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
 
-        /* Column widths */
-        .trades-table th:nth-child(1), .trades-table td:nth-child(1) { width: 15%; } /* Item */
+        /* Column widths - 9 columns now */
+        .trades-table th:nth-child(1), .trades-table td:nth-child(1) { width: 14%; } /* Item */
         .trades-table th:nth-child(2), .trades-table td:nth-child(2) { width: 8%; }  /* Profit */
         .trades-table th:nth-child(3), .trades-table td:nth-child(3) { width: 7%; }  /* Time */
-        .trades-table th:nth-child(4), .trades-table td:nth-child(4) { width: 9%; }  /* ISK/Hour */
-        .trades-table th:nth-child(5), .trades-table td:nth-child(5) { width: 5%; }  /* Jumps - thinner */
-        .trades-table th:nth-child(6), .trades-table td:nth-child(6) { width: 5%; }  /* Trips - thinner */
-        .trades-table th:nth-child(7), .trades-table td:nth-child(7) { width: 11%; } /* Amount */
-        .trades-table th:nth-child(8), .trades-table td:nth-child(8) { width: 40%; } /* Route - much wider */
+        .trades-table th:nth-child(4), .trades-table td:nth-child(4) { width: 8%; }  /* ISK/h */
+        .trades-table th:nth-child(5), .trades-table td:nth-child(5) { width: 8%; }  /* ISK/j */
+        .trades-table th:nth-child(6), .trades-table td:nth-child(6) { width: 5%; }  /* Jumps */
+        .trades-table th:nth-child(7), .trades-table td:nth-child(7) { width: 6%; }  /* Trips */
+        .trades-table th:nth-child(8), .trades-table td:nth-child(8) { width: 8%; }  /* Qty */
+        .trades-table th:nth-child(9), .trades-table td:nth-child(9) { width: 36%; } /* Route */
 
         .trades-table tr:hover { background: var(--bg-card-hover); }
         .trades-table tr:last-child td { border-bottom: none; }
+        .trades-table tr.selected { 
+            background: rgba(0, 212, 255, 0.15) !important; 
+        }
 
         .item-name {
             font-weight: 600;
@@ -431,29 +465,29 @@
             text-overflow: ellipsis;
         }
 
-        .profit { color: var(--profit); font-weight: 700; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; }
-        .isk-hour { color: #f472b6; font-weight: 700; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; }
-        .time-cell { color: var(--text-muted); font-family: 'Orbitron', sans-serif; font-size: 0.75rem; white-space: nowrap; }
+        .profit { color: var(--profit); font-weight: 700; font-size: 0.75rem; }
+        .isk-hour { color: #f472b6; font-weight: 600; font-size: 0.75rem; }
+        .isk-jump { color: var(--accent); font-weight: 600; font-size: 0.75rem; }
+        .time-cell { color: var(--text-muted); font-size: 0.7rem; white-space: nowrap; }
 
         .badge {
             display: inline-block;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.75rem;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 0.7rem;
             white-space: nowrap;
         }
 
-        .jumps-badge { background: rgba(139, 92, 246, 0.2); border: 1px solid rgba(139, 92, 246, 0.5); color: #a78bfa; }
-        .trips-badge { background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.5); color: var(--warning); }
-        .amount-badge { background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.5); color: var(--profit); font-size: 0.7rem; }
-        .single-trip-badge { background: rgba(0, 212, 255, 0.2); border: 1px solid rgba(0, 212, 255, 0.5); color: var(--accent); font-size: 0.7rem; }
+        .jumps-badge { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+        .trips-badge { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .amount-badge { background: rgba(16, 185, 129, 0.15); color: var(--profit); font-size: 0.7rem; }
+        .single-trip-badge { background: rgba(0, 212, 255, 0.15); color: var(--accent); font-size: 0.7rem; }
 
-        .efficiency-boost { color: var(--profit); font-size: 0.7rem; font-weight: 600; margin-left: 5px; }
-        .variant-label { font-size: 0.65rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
-        .full-order-label { font-size: 0.65rem; color: var(--text-muted); }
+        .efficiency-boost { color: var(--profit); font-size: 0.65rem; font-weight: 600; display: block; }
+        .variant-label { font-size: 0.6rem; color: var(--text-muted); }
+        .full-order-label { font-size: 0.6rem; color: var(--text-muted); }
 
-        .trade-variant { background: rgba(0, 212, 255, 0.03); }
-        .trade-variant td { border-left: 2px solid var(--accent); }
+        .trade-variant { background: rgba(0, 212, 255, 0.02); }
 
         .route { 
             font-size: 0.8rem; 
@@ -484,6 +518,508 @@
 
         .error-msg.show { display: block; }
 
+        /* Character Panel */
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left { flex: 1; }
+        .header-center { 
+            flex: 2; 
+            text-align: center; 
+        }
+        .header-right { 
+            flex: 1; 
+            display: flex; 
+            justify-content: flex-end; 
+        }
+
+        .character-panel {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 15px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+
+        .character-portrait {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            border: 2px solid var(--accent);
+        }
+
+        .character-info {
+            text-align: left;
+        }
+
+        .character-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .character-location {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            max-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .character-wallet {
+            font-size: 0.8rem;
+            color: var(--profit);
+            font-weight: 600;
+        }
+
+        .login-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--accent), #0ea5e9);
+            border: none;
+            border-radius: 8px;
+            color: var(--bg-dark);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--accent-glow);
+        }
+
+        .char-status-card {
+            position: relative;
+        }
+
+        .logout-corner {
+            position: absolute;
+            top: 48px;
+            right: 12px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-muted);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .logout-corner:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .selected-deal {
+            position: relative;
+        }
+
+        .clear-corner {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 24px;
+            height: 24px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-muted);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .clear-corner.visible {
+            display: flex;
+        }
+
+        .clear-corner:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .action-btn {
+            padding: 3px 8px;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid var(--accent);
+            border-radius: 4px;
+            color: var(--accent);
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .action-btn:hover {
+            background: var(--accent);
+            color: var(--bg-dark);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .trade-actions {
+            display: flex;
+            gap: 5px;
+            margin-top: 3px;
+        }
+
+        /* ========== Status Panel ========== */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+        }
+
+        .main-content { min-width: 0; }
+
+        .status-panel {
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+
+        .status-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .status-card-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-card-title .live-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--profit);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .char-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .char-portrait-lg {
+            width: 64px;
+            height: 64px;
+            border-radius: 10px;
+            border: 2px solid var(--accent);
+        }
+
+        .char-details { flex: 1; }
+
+        .char-name-lg {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            color: var(--accent);
+        }
+
+        .char-ship {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .status-item {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .status-item.full { grid-column: span 2; }
+
+        .status-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            color: var(--text);
+            margin-top: 3px;
+        }
+
+        .status-value.profit { color: var(--profit); }
+        .status-value.warning { color: var(--warning); }
+        .status-value.accent { color: var(--accent); }
+        .status-value.small { font-size: 0.85rem; }
+
+        .location-value {
+            font-size: 0.8rem;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .docked-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            background: var(--profit);
+            color: var(--bg-dark);
+            border-radius: 3px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            margin-left: 5px;
+        }
+
+        .in-space-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            background: var(--warning);
+            color: var(--bg-dark);
+            border-radius: 3px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            margin-left: 5px;
+        }
+
+        /* Selected Deal */
+        .selected-deal {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(139, 92, 246, 0.1));
+            border: 1px solid var(--accent);
+        }
+
+        .deal-item-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .deal-route {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .deal-route-arrow { color: var(--accent); margin: 0 5px; }
+
+        .deal-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .deal-stat {
+            text-align: center;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+        }
+
+        .deal-stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            color: var(--profit);
+        }
+
+        .deal-stat-label {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .deal-progress {
+            margin-bottom: 12px;
+        }
+
+        .deal-progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .deal-progress-bar {
+            height: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .deal-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--profit));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .no-deal {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+        }
+
+        .no-deal-icon { 
+            font-size: 1.5rem; 
+            margin-bottom: 10px;
+            font-family: 'Orbitron', sans-serif;
+            color: var(--accent);
+        }
+
+        /* Action Buttons Panel */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .action-btn-lg {
+            padding: 8px 10px;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .action-btn-lg:hover:not(:disabled) {
+            border-color: var(--accent);
+            background: rgba(0, 212, 255, 0.2);
+            color: var(--accent);
+        }
+
+        .action-btn-lg:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .action-btn-lg.primary {
+            background: linear-gradient(135deg, var(--accent), #0ea5e9);
+            color: var(--bg-dark);
+            border: none;
+            font-weight: 700;
+        }
+
+        .action-btn-lg.primary:hover:not(:disabled) {
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .action-btn-lg.full { grid-column: span 2; }
+
+        .action-btn-lg.danger { border-color: var(--danger); color: var(--danger); }
+        .action-btn-lg.danger:hover:not(:disabled) { background: rgba(239, 68, 68, 0.2); }
+
+        .login-prompt {
+            text-align: center;
+            padding: 20px 15px;
+        }
+
+        .login-prompt-icon { 
+            font-size: 1.5rem; 
+            margin-bottom: 10px;
+            font-family: 'Orbitron', sans-serif;
+            color: var(--accent);
+        }
+
+        .login-prompt-text {
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .fees-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .fee-item {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .fee-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            color: var(--warning);
+        }
+
+        .fee-label {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 1200px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+            .status-panel {
+                position: static;
+                max-height: none;
+            }
+        }
+
         @media (max-width: 1200px) {
             .controls-row-main { grid-template-columns: 1fr; }
             .form-grid { grid-template-columns: repeat(2, 1fr); }
@@ -502,6 +1038,10 @@
             <p class="subtitle">Market Scanner & Profit Calculator</p>
         </header>
 
+        <div class="main-layout">
+        <!-- Main Content -->
+        <div class="main-content">
+
         <div class="controls-wrapper">
             <!-- Row 1: Market Settings + Ship Parameters -->
             <div class="controls-row-main">
@@ -509,7 +1049,7 @@
                     <div class="panel-header">
                         <span class="panel-title">Market Settings</span>
                     </div>
-                    <div class="form-grid">
+                    <div class="form-grid-5">
                         <div class="form-group">
                             <label>Market Group</label>
                             <select id="groupSelect">
@@ -519,17 +1059,37 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Min Profit (ISK)</label>
-                            <input type="text" id="minProfit" value="10 000 000" placeholder="10 000 000">
+                            <label>Min Profit</label>
+                            <input type="text" id="minProfit" value="10 000 000" placeholder="10M">
                         </div>
                         <div class="form-group">
-                            <label>Cargo Capacity (m³)</label>
-                            <input type="text" id="cargoCapacity" value="830 000" placeholder="830 000">
+                            <label>Max Cargo</label>
+                            <input type="text" id="cargoCapacity" value="5 000" placeholder="5K">
                         </div>
                         <div class="form-group">
-                            <label>Max Budget (ISK)</label>
-                            <input type="text" id="maxBudget" value="500 000 000" placeholder="500 000 000">
+                            <label>Max Budget</label>
+                            <input type="text" id="maxBudget" value="500 000 000" placeholder="500M">
                         </div>
+                        <div class="form-group">
+                            <label>Max Trips</label>
+                            <input type="number" id="maxTrips" value="" placeholder="-" step="1" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Max Jumps</label>
+                            <input type="number" id="maxJumps" value="" placeholder="-" step="1" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Min ISK/h</label>
+                            <input type="text" id="minIskPerHour" value="" placeholder="-">
+                        </div>
+                        <div class="form-group">
+                            <label>Max Time (m)</label>
+                            <input type="number" id="maxTime" value="" placeholder="-" step="5" min="1">
+                        </div>
+                    </div>
+                    <div class="sync-row">
+                        <button class="sync-btn-inline" id="btnSyncWallet" onclick="syncWallet()" title="Sync wallet balance">Sync Wallet</button>
+                        <button class="sync-btn-inline" id="btnSyncCargo" onclick="syncCargo()" title="Sync cargo from current ship">Sync Cargo</button>
                     </div>
                 </div>
 
@@ -559,12 +1119,7 @@
                                 <label>Warp Full (AU/s)</label>
                                 <input type="number" id="warpFull" value="1.5" step="0.1" min="0.5">
                             </div>
-                            <div class="form-group">
-                                <label>Max Time (minutes)</label>
-                                <input type="number" id="maxTime" value="" placeholder="No limit" step="5" min="1">
-                            </div>
                         </div>
-                        <div class="info-text">💡 Get values from EFT/Pyfa. Full = with cargo expanders.</div>
                     </div>
                 </div>
             </div>
@@ -574,7 +1129,7 @@
                 <div class="panel-header">
                     <span class="panel-title">Route & Trade Options</span>
                 </div>
-                <div class="form-grid">
+                <div class="form-grid-3">
                     <div class="form-group">
                         <label>Route Safety</label>
                         <select id="routeFlag">
@@ -593,7 +1148,7 @@
                     </div>
                     <div class="form-group">
                         <label>Include Regions</label>
-                        <div class="checkbox-row">
+                        <div class="checkbox-col">
                             <div class="checkbox-item highsec">
                                 <input type="checkbox" id="regionHighsec" checked>
                                 <label for="regionHighsec">Highsec</label>
@@ -606,13 +1161,6 @@
                                 <input type="checkbox" id="regionNullsec">
                                 <label for="regionNullsec">Nullsec</label>
                             </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Gate Camp Check</label>
-                        <div class="toggle-row">
-                            <div class="toggle" id="checkCampsToggle" onclick="toggleCamps()"></div>
-                            <span id="campsLabel">Disabled</span>
                         </div>
                     </div>
                 </div>
@@ -653,31 +1201,19 @@
             </div>
         </div>
 
-        <!-- Sort Controls -->
-        <div class="sort-controls">
-            <span class="sort-label">Sort by:</span>
-            <button class="sort-btn active desc" data-sort="profit_per_hour" id="sortProfitHour">ISK/Hour <span class="sort-arrow">▼</span></button>
-            <button class="sort-btn desc" data-sort="profit_per_jump">ISK/Jump <span class="sort-arrow">▼</span></button>
-            <button class="sort-btn desc" data-sort="profit">Profit <span class="sort-arrow">▼</span></button>
-            <button class="sort-btn desc" data-sort="isk_per_m3">ISK/m³ <span class="sort-arrow">▼</span></button>
-            <button class="sort-btn asc" data-sort="time_seconds" id="sortTime">Time <span class="sort-arrow">▼</span></button>
-            <button class="sort-btn asc" data-sort="jumps">Jumps <span class="sort-arrow">▼</span></button>
-            <button class="sort-btn asc" data-sort="trips">Trips <span class="sort-arrow">▼</span></button>
-            <button class="sort-btn desc" data-sort="cost">Cost <span class="sort-arrow">▼</span></button>
-        </div>
-
         <!-- Trades Table -->
         <table class="trades-table">
             <thead>
                 <tr>
-                    <th>Item</th>
-                    <th>Profit</th>
-                    <th id="timeHeader">Time</th>
-                    <th id="iskHourHeader">ISK/Hour</th>
-                    <th>Jumps</th>
-                    <th>Trips</th>
-                    <th>Amount</th>
-                    <th>Route</th>
+                    <th class="sortable" data-sort="type_name" title="Item name">Item</th>
+                    <th class="sortable active desc" data-sort="profit" title="Total profit from this trade">Profit <span class="sort-arrow">v</span></th>
+                    <th class="sortable" data-sort="time_seconds" id="timeHeader" title="Estimated travel time">Time <span class="sort-arrow">v</span></th>
+                    <th class="sortable" data-sort="profit_per_hour" id="iskHourHeader" title="Profit per hour of travel">ISK/h <span class="sort-arrow">v</span></th>
+                    <th class="sortable" data-sort="profit_per_jump" title="Profit per jump (efficiency)">ISK/j <span class="sort-arrow">v</span></th>
+                    <th class="sortable" data-sort="jumps" title="Number of jumps one way">Jumps <span class="sort-arrow">v</span></th>
+                    <th class="sortable" data-sort="trips" title="Round trips needed to move all goods">Trips <span class="sort-arrow">v</span></th>
+                    <th class="sortable" data-sort="cost" title="Adjusted / Original quantity">Qty <span class="sort-arrow">v</span></th>
+                    <th title="Buy station -> Sell station">Route</th>
                 </tr>
             </thead>
             <tbody id="tradesBody">
@@ -691,19 +1227,139 @@
                 </tr>
             </tbody>
         </table>
-    </div>
+        </div><!-- End main-content -->
+
+        <!-- Status Panel (Right Side) -->
+        <div class="status-panel">
+            {% if character %}
+            <!-- Character Status Card -->
+            <div class="status-card char-status-card">
+                <a href="/logout" class="logout-corner" title="Logout">x</a>
+                <div class="status-card-title">
+                    <span class="live-dot"></span>
+                    Character Status
+                </div>
+                <div class="char-header">
+                    <img class="char-portrait-lg" src="{{ character.portrait }}" alt="Portrait" id="charPortrait">
+                    <div class="char-details">
+                        <div class="char-name-lg" id="charName">{{ character.name }}</div>
+                        <div class="char-ship" id="charShip">Loading ship...</div>
+                    </div>
+                </div>
+                <div class="status-grid">
+                    <div class="status-item full">
+                        <div class="status-label">Location</div>
+                        <div class="location-value" id="charLocation">Loading...</div>
+                    </div>
+                    <div class="status-item full">
+                        <div class="status-label">Wallet</div>
+                        <div class="status-value profit" id="charWallet">-</div>
+                    </div>
+                </div>
+                <div class="fees-grid">
+                    <div class="fee-item">
+                        <div class="fee-value" id="brokerFee">3.0%</div>
+                        <div class="fee-label">Broker Fee</div>
+                    </div>
+                    <div class="fee-item">
+                        <div class="fee-value" id="salesTax">8.0%</div>
+                        <div class="fee-label">Sales Tax</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selected Deal Card -->
+            <div class="status-card selected-deal" id="selectedDealCard">
+                <button class="clear-corner" id="btnClearDeal" onclick="clearDeal()" title="Clear selection">x</button>
+                <div class="status-card-title">Selected Deal</div>
+                <div id="selectedDealContent">
+                    <div class="no-deal">
+                        <div class="no-deal-icon">&gt;&gt;</div>
+                        <div>Click a trade to select it</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions Card -->
+            <div class="status-card">
+                <div class="status-card-title">Quick Actions</div>
+                <div class="action-buttons">
+                    <button class="action-btn-lg" id="btnSetBuyDest" onclick="setDestination('buy')" disabled>
+                        Go to Buy
+                    </button>
+                    <button class="action-btn-lg" id="btnSetSellDest" onclick="setDestination('sell')" disabled>
+                        Go to Sell
+                    </button>
+                    <button class="action-btn-lg full" id="btnOpenMarket" onclick="openMarketForDeal()" disabled>
+                        Open Market Details
+                    </button>
+                </div>
+            </div>
+
+            <!-- Deal Progress Card (hidden until deal started) -->
+            <div class="status-card" id="dealProgressCard" style="display: none;">
+                <div class="status-card-title">[~] Deal Progress</div>
+                <div class="deal-progress">
+                    <div class="deal-progress-label">
+                        <span id="progressPhase">Phase 1: Travel to Buy</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+                    <div class="deal-progress-bar">
+                        <div class="deal-progress-fill" id="dealProgressFill" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="status-grid">
+                    <div class="status-item">
+                        <div class="status-label">Est. Time Left</div>
+                        <div class="status-value small" id="estTimeLeft">-</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-label">Est. Profit</div>
+                        <div class="status-value profit small" id="estProfit">-</div>
+                    </div>
+                </div>
+            </div>
+
+            {% else %}
+            <!-- Login Prompt -->
+            <div class="status-card">
+                <div class="login-prompt">
+                    <div class="login-prompt-icon">[&gt;]</div>
+                    <div class="login-prompt-text">
+                        Login with your EVE account to unlock character features:
+                        <br><br>
+                        - Auto-sync wallet balance<br>
+                        - Set in-game destinations<br>
+                        - Track deal progress<br>
+                        - Calculate accurate fees
+                    </div>
+                    <a href="/login" class="action-btn-lg full primary" style="text-decoration: none;">
+                        &gt; Login with EVE
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div><!-- End status-panel -->
+        </div><!-- End main-layout -->
+    </div><!-- End container -->
 
     <script>
         let currentSort = 'profit_per_hour';
         let sortDirection = 'desc'; // 'asc' or 'desc'
         let isScanning = false;
         let pollInterval;
-        let checkCamps = false;
         let shipParamsEnabled = true;
+        let isLoggedIn = {{ 'true' if character else 'false' }};
+        let characterData = null;
+        let selectedDeal = null;
+        let activeDeal = null;
+        let allTradesCache = [];
+        let characterStatusInterval = null;
 
         // ========== Number Formatting ==========
         
         function formatNumberCompact(num) {
+            if (num === undefined || num === null || isNaN(num)) return '0';
             if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
             if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
             if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
@@ -711,6 +1367,7 @@
         }
 
         function formatNumber(num) {
+            if (num === undefined || num === null || isNaN(num)) return '0';
             return formatNumberCompact(num);
         }
 
@@ -722,6 +1379,18 @@
         function parseSpacedNumber(str) {
             if (!str) return 0;
             return parseFloat(str.toString().replace(/\s/g, '').replace(/,/g, '')) || 0;
+        }
+
+        function getSecurityClass(security) {
+            if (security === undefined || security === null) return 'highsec';
+            if (security >= 0.5) return 'highsec';
+            if (security > 0) return 'lowsec';
+            return 'nullsec';
+        }
+
+        function formatSecurity(security) {
+            if (security === undefined || security === null) return '';
+            return security.toFixed(1);
         }
 
         // ========== Input Helpers ==========
@@ -739,6 +1408,17 @@
         function getMaxTime() {
             const val = parseFloat(document.getElementById('maxTime').value);
             return val > 0 ? val * 60 : Infinity; // Convert minutes to seconds
+        }
+        function getMaxTrips() {
+            const val = parseInt(document.getElementById('maxTrips').value);
+            return val > 0 ? val : Infinity;
+        }
+        function getMaxJumps() {
+            const val = parseInt(document.getElementById('maxJumps').value);
+            return val > 0 ? val : Infinity;
+        }
+        function getMinIskPerHour() {
+            return getInputValue('minIskPerHour', 0);
         }
 
         function getShipStats() {
@@ -760,12 +1440,6 @@
         }
 
         // ========== UI Toggles ==========
-
-        function toggleCamps() {
-            checkCamps = !checkCamps;
-            document.getElementById('checkCampsToggle').classList.toggle('active', checkCamps);
-            document.getElementById('campsLabel').textContent = checkCamps ? 'Enabled' : 'Disabled';
-        }
 
         function toggleShipParams() {
             shipParamsEnabled = document.getElementById('enableShipParams').checked;
@@ -847,14 +1521,34 @@
         // ========== Trade Processing ==========
 
         function adjustTradeForBudget(trade, budget, cargoCapacity, shipStats) {
+            // Safety checks for invalid trade data
+            if (!trade || !trade.amount || trade.amount <= 0) {
+                console.log('Skipped trade (invalid amount):', trade?.type_name);
+                return [];
+            }
+            if (!trade.buy_price || trade.buy_price <= 0) {
+                console.log('Skipped trade (invalid buy_price):', trade.type_name);
+                return [];
+            }
+            if (!trade.sell_price) {
+                console.log('Skipped trade (invalid sell_price):', trade.type_name);
+                return [];
+            }
+            
             const costPerUnit = trade.buy_price;
             const profitPerUnit = trade.sell_price - trade.buy_price;
-            const volumePerUnit = trade.volume_m3 / trade.amount;
+            const volumePerUnit = (trade.volume_m3 && trade.amount) ? trade.volume_m3 / trade.amount : 1;
             
-            const maxAffordable = Math.floor(budget / costPerUnit);
+            // Handle infinite budget (no limit)
+            const maxAffordable = (budget === Infinity || !isFinite(budget) || budget <= 0) 
+                ? trade.amount 
+                : Math.floor(budget / costPerUnit);
             const adjustedAmount = Math.min(trade.amount, maxAffordable);
             
-            if (adjustedAmount <= 0) return [];
+            if (adjustedAmount <= 0) {
+                console.log('Skipped trade (cannot afford):', trade.type_name, 'Budget:', budget, 'CostPerUnit:', costPerUnit);
+                return [];
+            }
             
             const adjustedCost = adjustedAmount * costPerUnit;
             const adjustedProfit = adjustedAmount * profitPerUnit;
@@ -893,7 +1587,9 @@
             if (adjustedTrips > 1) {
                 const maxUnitsPerTrip = Math.floor(cargoCapacity / volumePerUnit);
                 const singleTripAmount = Math.min(maxUnitsPerTrip, adjustedAmount);
-                const budgetLimitedAmount = Math.floor(budget / costPerUnit);
+                const budgetLimitedAmount = (budget === Infinity || !isFinite(budget)) 
+                    ? singleTripAmount 
+                    : Math.floor(budget / costPerUnit);
                 const finalSingleTripAmount = Math.min(singleTripAmount, budgetLimitedAmount);
                 
                 if (finalSingleTripAmount > 0) {
@@ -1001,8 +1697,7 @@
                     cargo_capacity: getCargoCapacity(),
                     regions: getSelectedRegions(),
                     route_flag: document.getElementById('routeFlag').value,
-                    trade_mode: document.getElementById('tradeMode').value,
-                    check_camps: checkCamps
+                    trade_mode: document.getElementById('tradeMode').value
                 })
             });
 
@@ -1078,7 +1773,7 @@
 
         async function loadTrades() {
             try {
-                const response = await fetch('/api/trades?sort=profit&limit=500');
+                const response = await fetch('/api/trades?sort=profit_per_jump&limit=1000');
                 let rawTrades = await response.json();
                 
                 const budget = getBudget();
@@ -1086,18 +1781,57 @@
                 const shipStats = getShipStats();
                 const maxTime = getMaxTime();
                 
+                console.log('Loading trades:', rawTrades.length, 'Budget:', budget, 'Cargo:', cargoCapacity);
+                
                 let allTrades = [];
                 rawTrades.forEach(trade => {
-                    const variants = adjustTradeForBudget(trade, budget, cargoCapacity, shipStats);
-                    variants.forEach(v => {
-                        if (v.profit > 0) allTrades.push(v);
-                    });
+                    try {
+                        const variants = adjustTradeForBudget(trade, budget, cargoCapacity, shipStats);
+                        variants.forEach(v => {
+                            // More lenient check - include if profit is any positive number or 0
+                            if (v && v.profit !== undefined && !isNaN(v.profit) && v.profit >= 0) {
+                                allTrades.push(v);
+                            }
+                        });
+                    } catch (e) {
+                        console.error('Error processing trade:', trade.type_name, e);
+                    }
                 });
                 
+                console.log('Trades after budget adjustment:', allTrades.length);
+                
                 // Filter by max time (if ship params enabled and max time set)
-                if (shipParamsEnabled && maxTime < Infinity) {
-                    allTrades = allTrades.filter(t => t.time_seconds <= maxTime);
+                if (shipParamsEnabled && maxTime < Infinity && maxTime > 0) {
+                    const beforeCount = allTrades.length;
+                    allTrades = allTrades.filter(t => !t.time_seconds || t.time_seconds <= maxTime);
+                    if (allTrades.length < beforeCount) console.log('Filtered by time:', beforeCount - allTrades.length);
                 }
+                
+                // Filter by max trips
+                const maxTrips = getMaxTrips();
+                if (maxTrips < Infinity && maxTrips > 0) {
+                    const beforeCount = allTrades.length;
+                    allTrades = allTrades.filter(t => !t.trips || t.trips <= maxTrips);
+                    if (allTrades.length < beforeCount) console.log('Filtered by trips:', beforeCount - allTrades.length);
+                }
+                
+                // Filter by max jumps
+                const maxJumps = getMaxJumps();
+                if (maxJumps < Infinity && maxJumps > 0) {
+                    const beforeCount = allTrades.length;
+                    allTrades = allTrades.filter(t => !t.jumps || t.jumps <= maxJumps);
+                    if (allTrades.length < beforeCount) console.log('Filtered by jumps:', beforeCount - allTrades.length);
+                }
+                
+                // Filter by min ISK/h (if ship params enabled)
+                const minIskPerHour = getMinIskPerHour();
+                if (shipParamsEnabled && minIskPerHour > 0) {
+                    const beforeCount = allTrades.length;
+                    allTrades = allTrades.filter(t => !t.profit_per_hour || t.profit_per_hour >= minIskPerHour);
+                    if (allTrades.length < beforeCount) console.log('Filtered by ISK/h:', beforeCount - allTrades.length);
+                }
+                
+                console.log('Final trades count:', allTrades.length);
                 
                 // Sort with direction
                 allTrades.sort((a, b) => {
@@ -1116,11 +1850,12 @@
         function renderTrades(trades) {
             const tbody = document.getElementById('tradesBody');
             const showTime = shipParamsEnabled;
+            allTradesCache = trades;
             
             if (trades.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="8">
+                        <td colspan="9">
                             <div class="empty-state">
                                 <h3>No trades found</h3>
                                 <p>Configure settings and start a scan</p>
@@ -1131,36 +1866,53 @@
                 return;
             }
 
-            tbody.innerHTML = trades.map(trade => {
+            tbody.innerHTML = trades.map((trade, index) => {
                 const isSingleTrip = trade.variant === 'single_trip';
-                const rowClass = isSingleTrip ? 'trade-variant' : '';
+                const isSelected = selectedDeal && selectedDeal.type_id === trade.type_id && 
+                                   selectedDeal.from_station_id === trade.from_station_id &&
+                                   selectedDeal.variant === trade.variant;
+                const selectedClass = isSelected ? 'selected' : '';
                 
                 let itemLabel = trade.type_name;
-                let tripsBadge = `<span class="badge trips-badge">${trade.trips}</span>`;
+                let tripsBadge = `<span class="badge trips-badge" title="Round trips needed">${trade.trips}</span>`;
                 
                 if (isSingleTrip) {
-                    itemLabel = `<span class="variant-label">⚡ 1-TRIP</span> ${trade.type_name}`;
-                    tripsBadge = `<span class="badge single-trip-badge">1</span><span class="efficiency-boost">+${trade.efficiency_boost.toFixed(0)}%</span>`;
+                    itemLabel = `<span class="variant-label">1-trip</span> ${trade.type_name}`;
+                    const boostPct = trade.efficiency_boost ? trade.efficiency_boost.toFixed(0) : '0';
+                    tripsBadge = `<span class="badge single-trip-badge" title="Single trip variant">1</span><span class="efficiency-boost" title="Efficiency boost vs full order">+${boostPct}%</span>`;
                 } else if (trade.has_single_trip_option) {
-                    itemLabel = `<span class="full-order-label">FULL</span> ${trade.type_name}`;
+                    itemLabel = `<span class="full-order-label">full</span> ${trade.type_name}`;
                 }
                 
-                const timeCell = showTime ? `<td class="time-cell">${formatTime(trade.time_seconds)}</td>` : '';
-                const iskHourCell = showTime ? `<td class="isk-hour">${formatNumber(trade.profit_per_hour)}/h</td>` : '';
+                // Build quantity tooltip
+                const qtyTooltip = trade.original_amount > trade.amount 
+                    ? `Adjusted: ${trade.amount} / Original: ${trade.original_amount} (limited by budget)`
+                    : `Quantity: ${trade.amount}`;
+                const qtyDisplay = trade.original_amount > trade.amount 
+                    ? `${formatAmountCompact(trade.amount)}/${formatAmountCompact(trade.original_amount)}`
+                    : formatAmountCompact(trade.amount);
+                
+                const timeCell = showTime ? `<td class="time-cell" title="Estimated round-trip time">${formatTime(trade.time_seconds)}</td>` : '<td>-</td>';
+                const iskHourCell = showTime ? `<td class="isk-hour" title="Profit per hour: ${formatNumber(trade.profit_per_hour)} ISK">${formatNumber(trade.profit_per_hour)}</td>` : '<td>-</td>';
                 
                 return `
-                <tr class="${rowClass}">
+                <tr class="${selectedClass}" onclick="selectDeal(${index})" style="cursor: pointer;">
                     <td class="item-name" title="${trade.type_name}">${itemLabel}</td>
-                    <td class="profit">${formatNumber(trade.profit)}</td>
+                    <td class="profit" title="Total profit: ${formatWithSpaces(Math.floor(trade.profit))} ISK">${formatNumber(trade.profit)}</td>
                     ${timeCell}
                     ${iskHourCell}
-                    <td><span class="badge jumps-badge">${trade.jumps}</span></td>
+                    <td class="isk-jump" title="Profit per jump: ${formatNumber(trade.profit_per_jump)} ISK">${formatNumber(trade.profit_per_jump)}</td>
+                    <td><span class="badge jumps-badge" title="Jumps one way">${trade.jumps}</span></td>
                     <td>${tripsBadge}</td>
-                    <td><span class="badge amount-badge">${formatAmountCompact(trade.amount)}${trade.original_amount > trade.amount ? '/' + formatAmountCompact(trade.original_amount) : ''}</span></td>
+                    <td><span class="badge amount-badge" title="${qtyTooltip}">${qtyDisplay}</span></td>
                     <td class="route">
-                        <span class="route-station" title="${trade.from_station_name}">${trade.from_station_name}</span>
-                        <span class="route-arrow">→</span>
-                        <span class="route-station" title="${trade.to_station_name}">${trade.to_station_name}</span>
+                        <span class="route-station" title="Buy at: ${trade.from_station_name} (${formatSecurity(trade.from_security)})">
+                            <span class="sec-dot ${getSecurityClass(trade.from_security)}"></span>${trade.from_station_name}
+                        </span>
+                        <span class="route-arrow">-></span>
+                        <span class="route-station" title="Sell at: ${trade.to_station_name} (${formatSecurity(trade.to_security)})">
+                            <span class="sec-dot ${getSecurityClass(trade.to_security)}"></span>${trade.to_station_name}
+                        </span>
                     </td>
                 </tr>
             `}).join('');
@@ -1209,37 +1961,441 @@
             // Ship params toggle
             document.getElementById('enableShipParams').addEventListener('change', toggleShipParams);
 
-            // Sort buttons with direction toggle
-            document.querySelectorAll('.sort-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const sortKey = btn.dataset.sort;
+            // Sortable table headers
+            document.querySelectorAll('.trades-table th.sortable').forEach(th => {
+                th.addEventListener('click', () => {
+                    const sortKey = th.dataset.sort;
                     
                     if (currentSort === sortKey) {
-                        // Toggle direction if clicking same button
+                        // Toggle direction
                         sortDirection = sortDirection === 'desc' ? 'asc' : 'desc';
-                        btn.classList.toggle('desc', sortDirection === 'desc');
-                        btn.classList.toggle('asc', sortDirection === 'asc');
                     } else {
-                        // New sort column - use button's default direction
-                        document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
+                        // New column - default to desc for values, asc for jumps/trips/time
+                        document.querySelectorAll('.trades-table th.sortable').forEach(h => {
+                            h.classList.remove('active', 'asc', 'desc');
+                        });
                         currentSort = sortKey;
-                        // Get default direction from button class
-                        sortDirection = btn.classList.contains('asc') ? 'asc' : 'desc';
+                        // Default directions
+                        const ascDefaults = ['jumps', 'trips', 'time_seconds'];
+                        sortDirection = ascDefaults.includes(sortKey) ? 'asc' : 'desc';
                     }
+                    
+                    // Update classes
+                    document.querySelectorAll('.trades-table th.sortable').forEach(h => {
+                        h.classList.remove('active', 'asc', 'desc');
+                    });
+                    th.classList.add('active', sortDirection);
+                    
                     loadTrades();
                 });
             });
 
             // Reload on settings change
-            ['maxBudget', 'cargoCapacity', 'alignEmpty', 'alignFull', 'warpEmpty', 'warpFull', 'maxTime'].forEach(id => {
+            ['maxBudget', 'cargoCapacity', 'alignEmpty', 'alignFull', 'warpEmpty', 'warpFull', 'maxTime', 'maxTrips', 'maxJumps', 'minIskPerHour'].forEach(id => {
                 document.getElementById(id).addEventListener('change', loadTrades);
             });
 
             // Initial load
             loadTrades();
             updateStatus();
+            
+            // Load character info if logged in
+            if (isLoggedIn) {
+                loadCharacterStatus();
+                // Refresh character status every 10 seconds
+                characterStatusInterval = setInterval(loadCharacterStatus, 10000);
+            }
         });
+
+        // ========== Character Status Functions ==========
+
+        let connectionRetries = 0;
+        const MAX_RETRIES = 3;
+
+        async function loadCharacterStatus() {
+            if (!isLoggedIn) return;
+            
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 8000);
+                
+                const response = await fetch('/api/character/status', {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                
+                const data = await response.json();
+                
+                if (data.logged_in) {
+                    characterData = data;
+                    updateCharacterStatusUI(data);
+                    connectionRetries = 0; // Reset on success
+                    
+                    // Update deal progress if tracking
+                    if (activeDeal) {
+                        updateDealProgress(data);
+                    }
+                } else if (data.needs_reauth) {
+                    // Token expired and refresh failed
+                    showConnectionError('Session expired. Please re-login.');
+                    clearInterval(characterStatusInterval);
+                }
+            } catch (e) {
+                connectionRetries++;
+                console.error('Failed to load character status:', e, `(retry ${connectionRetries}/${MAX_RETRIES})`);
+                
+                if (connectionRetries >= MAX_RETRIES) {
+                    showConnectionError('Connection lost. Retrying...');
+                    connectionRetries = 0; // Reset and keep trying
+                }
+            }
+        }
+
+        function showConnectionError(message) {
+            const locationEl = document.getElementById('charLocation');
+            if (locationEl) {
+                locationEl.innerHTML = `<span style="color: var(--danger);">[!] ${message}</span>`;
+            }
+        }
+
+        function updateCharacterStatusUI(data) {
+            // Update location
+            const locationEl = document.getElementById('charLocation');
+            if (locationEl) {
+                const docked = data.is_docked ? '<span class="docked-badge">DOCKED</span>' : '<span class="in-space-badge">IN SPACE</span>';
+                const locName = data.location_station_name || data.location_system_name || 'Unknown';
+                const secClass = getSecurityClass(data.location_security || 0);
+                locationEl.innerHTML = `<span class="sec-dot ${secClass}"></span>${locName} ${docked}`;
+            }
+            
+            // Update ship
+            const shipEl = document.getElementById('charShip');
+            if (shipEl) {
+                shipEl.textContent = `${data.ship_type_name} "${data.ship_name}"`;
+            }
+            
+            // Update wallet
+            const walletEl = document.getElementById('charWallet');
+            if (walletEl) {
+                walletEl.textContent = formatNumberCompact(data.wallet);
+            }
+            
+            // Update fees
+            const brokerEl = document.getElementById('brokerFee');
+            const taxEl = document.getElementById('salesTax');
+            if (brokerEl) brokerEl.textContent = data.broker_fee.toFixed(1) + '%';
+            if (taxEl) taxEl.textContent = data.sales_tax.toFixed(1) + '%';
+        }
+
+        async function refreshCharacter() {
+            await loadCharacterStatus();
+        }
+
+        // ========== Sync Functions ==========
+
+        async function syncWallet() {
+            if (!isLoggedIn) return;
+            
+            await loadCharacterStatus();
+            
+            if (characterData && characterData.wallet) {
+                const budgetInput = document.getElementById('maxBudget');
+                budgetInput.value = formatWithSpaces(Math.floor(characterData.wallet));
+                loadTrades();
+                
+                showButtonFeedback('btnSyncWallet');
+            }
+        }
+
+        async function syncCargo() {
+            if (!isLoggedIn) return;
+            
+            try {
+                const response = await fetch('/api/character/ship');
+                const data = await response.json();
+                
+                if (data.cargo) {
+                    const cargoInput = document.getElementById('cargoCapacity');
+                    cargoInput.value = formatWithSpaces(Math.floor(data.cargo));
+                    loadTrades();
+                    
+                    showButtonFeedback('btnSyncCargo');
+                }
+            } catch (e) {
+                console.error('Failed to sync cargo:', e);
+            }
+        }
+
+        function showButtonFeedback(btnId) {
+            const btn = document.getElementById(btnId);
+            if (btn) {
+                const original = btn.innerHTML;
+                btn.innerHTML = 'OK';
+                btn.style.background = 'var(--profit)';
+                btn.style.color = 'var(--bg-dark)';
+                setTimeout(() => {
+                    btn.innerHTML = original;
+                    btn.style.background = '';
+                    btn.style.color = '';
+                }, 1500);
+            }
+        }
+
+        // ========== Deal Selection & Management ==========
+
+        function selectDeal(index) {
+            const trade = allTradesCache[index];
+            if (!trade) return;
+            
+            selectedDeal = trade;
+            updateSelectedDealUI();
+            updateActionButtons();
+            
+            // Re-render to show selection
+            renderTrades(allTradesCache);
+        }
+
+        function updateSelectedDealUI() {
+            const content = document.getElementById('selectedDealContent');
+            const clearBtn = document.getElementById('btnClearDeal');
+            
+            if (!selectedDeal) {
+                content.innerHTML = `
+                    <div class="no-deal">
+                        <div class="no-deal-icon">&gt;&gt;</div>
+                        <div>Click a trade to select it</div>
+                    </div>
+                `;
+                if (clearBtn) clearBtn.classList.remove('visible');
+                return;
+            }
+            
+            if (clearBtn) clearBtn.classList.add('visible');
+            
+            const d = selectedDeal;
+            content.innerHTML = `
+                <div class="deal-item-name">${d.type_name}</div>
+                <div class="deal-route">
+                    <span title="${d.from_station_name} (${formatSecurity(d.from_security)})">
+                        <span class="sec-dot ${getSecurityClass(d.from_security)}"></span>${truncate(d.from_station_name, 20)}
+                    </span>
+                    <span class="deal-route-arrow">→</span>
+                    <span title="${d.to_station_name} (${formatSecurity(d.to_security)})">
+                        <span class="sec-dot ${getSecurityClass(d.to_security)}"></span>${truncate(d.to_station_name, 20)}
+                    </span>
+                </div>
+                <div class="deal-stats">
+                    <div class="deal-stat">
+                        <div class="deal-stat-value">${formatNumber(d.profit)}</div>
+                        <div class="deal-stat-label">Profit</div>
+                    </div>
+                    <div class="deal-stat">
+                        <div class="deal-stat-value">${d.jumps}</div>
+                        <div class="deal-stat-label">Jumps</div>
+                    </div>
+                    <div class="deal-stat">
+                        <div class="deal-stat-value">${d.trips}</div>
+                        <div class="deal-stat-label">Trips</div>
+                    </div>
+                </div>
+                <div class="deal-stats">
+                    <div class="deal-stat">
+                        <div class="deal-stat-value">${formatNumber(d.cost)}</div>
+                        <div class="deal-stat-label">Cost</div>
+                    </div>
+                    <div class="deal-stat">
+                        <div class="deal-stat-value">${formatAmountCompact(d.amount)}</div>
+                        <div class="deal-stat-label">Amount</div>
+                    </div>
+                    <div class="deal-stat">
+                        <div class="deal-stat-value">${formatTime(d.time_seconds)}</div>
+                        <div class="deal-stat-label">Est. Time</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateActionButtons() {
+            const hasSelection = selectedDeal !== null;
+            
+            document.getElementById('btnSetBuyDest').disabled = !hasSelection || !isLoggedIn;
+            document.getElementById('btnSetSellDest').disabled = !hasSelection || !isLoggedIn;
+            document.getElementById('btnOpenMarket').disabled = !hasSelection || !isLoggedIn;
+            document.getElementById('btnOpenInfo').disabled = !hasSelection || !isLoggedIn;
+            document.getElementById('btnStartDeal').disabled = !hasSelection || !isLoggedIn;
+            document.getElementById('btnClearDeal').disabled = !hasSelection;
+        }
+
+        function clearDeal() {
+            selectedDeal = null;
+            activeDeal = null;
+            document.getElementById('dealProgressCard').style.display = 'none';
+            updateSelectedDealUI();
+            updateActionButtons();
+            renderTrades(allTradesCache);
+        }
+
+        // ========== In-Game Actions ==========
+
+        async function setDestination(target) {
+            if (!isLoggedIn || !selectedDeal) return;
+            
+            const stationId = target === 'buy' ? selectedDeal.from_station_id : selectedDeal.to_station_id;
+            const routeFlag = document.getElementById('routeFlag').value;
+            const btnId = target === 'buy' ? 'btnSetBuyDest' : 'btnSetSellDest';
+            
+            try {
+                const response = await fetch('/api/set_destination', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        station_id: stationId,
+                        route_flag: routeFlag
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showButtonFeedback(btnId);
+                } else if (data.needs_reauth) {
+                    showButtonError(btnId, 'Re-login');
+                } else {
+                    showButtonError(btnId, 'Failed');
+                }
+            } catch (e) {
+                console.error('Failed to set destination:', e);
+                showButtonError(btnId, 'Error');
+            }
+        }
+
+        function showButtonError(btnId, text) {
+            const btn = document.getElementById(btnId);
+            if (btn) {
+                const original = btn.innerHTML;
+                btn.innerHTML = text;
+                btn.style.background = 'var(--danger)';
+                btn.style.color = 'white';
+                setTimeout(() => {
+                    btn.innerHTML = original;
+                    btn.style.background = '';
+                    btn.style.color = '';
+                }, 2000);
+            }
+        }
+
+        async function openMarketForDeal() {
+            if (!isLoggedIn || !selectedDeal) return;
+            
+            try {
+                const response = await fetch('/api/open_market', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type_id: selectedDeal.type_id })
+                });
+            } catch (e) {
+                console.error('Failed to open market:', e);
+            }
+        }
+
+        // ========== Deal Tracking ==========
+
+        function startDeal() {
+            if (!selectedDeal) return;
+            
+            activeDeal = {
+                ...selectedDeal,
+                startTime: Date.now(),
+                startWallet: characterData ? characterData.wallet : 0,
+                phase: 'travel_buy', // travel_buy, buying, travel_sell, selling, complete
+                buyStationId: selectedDeal.from_station_id,
+                sellStationId: selectedDeal.to_station_id
+            };
+            
+            // Show progress card (don't auto-set destination)
+            document.getElementById('dealProgressCard').style.display = 'block';
+            updateDealProgressUI();
+        }
+
+        function updateDealProgress(charData) {
+            if (!activeDeal) return;
+            
+            const currentStationId = charData.location_station_id;
+            const isDocked = charData.is_docked;
+            
+            // Determine phase based on location
+            if (activeDeal.phase === 'travel_buy') {
+                if (isDocked && currentStationId === activeDeal.buyStationId) {
+                    activeDeal.phase = 'buying';
+                }
+            } else if (activeDeal.phase === 'buying') {
+                // Check if wallet decreased (bought something)
+                if (charData.wallet < activeDeal.startWallet - activeDeal.cost * 0.5) {
+                    activeDeal.phase = 'travel_sell';
+                    activeDeal.boughtWallet = charData.wallet;
+                    setDestination('sell');
+                }
+            } else if (activeDeal.phase === 'travel_sell') {
+                if (isDocked && currentStationId === activeDeal.sellStationId) {
+                    activeDeal.phase = 'selling';
+                }
+            } else if (activeDeal.phase === 'selling') {
+                // Check if wallet increased (sold something)
+                if (charData.wallet > activeDeal.boughtWallet + activeDeal.profit * 0.5) {
+                    activeDeal.phase = 'complete';
+                }
+            }
+            
+            updateDealProgressUI();
+        }
+
+        function updateDealProgressUI() {
+            if (!activeDeal) return;
+            
+            const phaseEl = document.getElementById('progressPhase');
+            const percentEl = document.getElementById('progressPercent');
+            const fillEl = document.getElementById('dealProgressFill');
+            const timeEl = document.getElementById('estTimeLeft');
+            const profitEl = document.getElementById('estProfit');
+            
+            let progress = 0;
+            let phaseText = '';
+            
+            switch (activeDeal.phase) {
+                case 'travel_buy':
+                    progress = 10;
+                    phaseText = '[>] Traveling to buy location...';
+                    break;
+                case 'buying':
+                    progress = 35;
+                    phaseText = '[!] At buy location - purchase items';
+                    break;
+                case 'travel_sell':
+                    progress = 60;
+                    phaseText = '[>] Traveling to sell location...';
+                    break;
+                case 'selling':
+                    progress = 85;
+                    phaseText = '[!] At sell location - sell items';
+                    break;
+                case 'complete':
+                    progress = 100;
+                    phaseText = '[+] Deal complete!';
+                    break;
+            }
+            
+            phaseEl.textContent = phaseText;
+            percentEl.textContent = progress + '%';
+            fillEl.style.width = progress + '%';
+            
+            // Estimate time remaining
+            const elapsed = (Date.now() - activeDeal.startTime) / 1000;
+            const totalEstimate = activeDeal.time_seconds || 300;
+            const remaining = Math.max(0, totalEstimate - elapsed);
+            timeEl.textContent = formatTime(remaining);
+            
+            profitEl.textContent = formatNumber(activeDeal.profit);
+        }
     </script>
 </body>
 </html>
