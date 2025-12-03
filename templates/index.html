@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EVE Trading Tool</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0e17;
+            --bg-card: #111827;
+            --bg-card-hover: #1a2332;
+            --border: #1e3a5f;
+            --accent: #00d4ff;
+            --accent-glow: rgba(0, 212, 255, 0.3);
+            --profit: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text: #e2e8f0;
+            --text-muted: #64748b;
+            --highsec: #10b981;
+            --lowsec: #f59e0b;
+            --nullsec: #ef4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(ellipse at top, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 3px;
+        }
+
+        .subtitle { color: var(--text-muted); font-size: 1rem; margin-top: 5px; }
+
+        /* Control Panels */
+        .controls-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .controls-row-main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .control-panel {
+            padding: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .panel-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .panel-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .panel-toggle input { 
+            width: 16px; 
+            height: 16px; 
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+
+        .panel-content.disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group.span-2 { grid-column: span 2; }
+
+        label {
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input[type="text"], input[type="number"], select {
+            padding: 10px 12px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.95rem;
+            width: 100%;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        input.error { border-color: var(--danger); }
+
+        .checkbox-row {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        .checkbox-item input { 
+            width: 16px; 
+            height: 16px; 
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+
+        .checkbox-item.highsec label { color: var(--highsec); }
+        .checkbox-item.lowsec label { color: var(--lowsec); }
+        .checkbox-item.nullsec label { color: var(--nullsec); }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toggle {
+            position: relative;
+            width: 40px;
+            height: 22px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle.active { background: var(--accent); border-color: var(--accent); }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background: var(--text);
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .toggle.active::after { left: 20px; background: var(--bg-dark); }
+
+        .info-text { font-size: 0.7rem; color: var(--text-muted); margin-top: 8px; }
+
+        /* Scan Button */
+        .scan-btn-wrapper { margin-bottom: 25px; }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #0ea5e9);
+            color: var(--bg-dark);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--accent-glow);
+        }
+
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-stop { background: linear-gradient(135deg, var(--danger), #dc2626); }
+        .btn-stop:hover { box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3); }
+
+        /* Status Bar */
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+        .status-indicator { display: flex; align-items: center; gap: 8px; min-width: 100px; }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--text-muted);
+        }
+
+        .status-dot.idle { background: var(--text-muted); }
+        .status-dot.scanning { background: var(--warning); animation: pulse 1.5s infinite; }
+        .status-dot.complete { background: var(--profit); }
+        .status-dot.stopped { background: var(--danger); }
+        .status-dot.error { background: var(--danger); }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
+        }
+
+        .progress-wrapper { flex: 1; }
+
+        .progress-bar-bg {
+            height: 6px;
+            background: var(--bg-dark);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #8b5cf6);
+            border-radius: 3px;
+            transition: width 0.3s;
+            width: 0%;
+        }
+
+        .current-item {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .stats { display: flex; gap: 20px; }
+
+        .stat { text-align: center; }
+        .stat-value { font-family: 'Orbitron', sans-serif; font-size: 1rem; color: var(--accent); }
+        .stat-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; }
+
+        /* Sort Controls */
+        .sort-controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .sort-label { color: var(--text-muted); font-size: 0.85rem; margin-right: 5px; }
+
+        .sort-btn {
+            padding: 6px 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .sort-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .sort-btn.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .sort-arrow {
+            font-size: 0.7rem;
+            opacity: 0;
+            transition: all 0.2s;
+        }
+
+        .sort-btn.active .sort-arrow {
+            opacity: 1;
+        }
+
+        .sort-btn.desc .sort-arrow { transform: rotate(0deg); }
+        .sort-btn.asc .sort-arrow { transform: rotate(180deg); }
+
+        /* Table */
+        .trades-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-card);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .trades-table th {
+            padding: 12px 14px;
+            text-align: left;
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--accent);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+        }
+
+        .trades-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid rgba(30, 58, 95, 0.4);
+            font-size: 0.85rem;
+        }
+
+        .trades-table tr:hover { background: var(--bg-card-hover); }
+        .trades-table tr:last-child td { border-bottom: none; }
+
+        .item-name {
+            font-weight: 600;
+            max-width: 180px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .profit { color: var(--profit); font-weight: 700; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; }
+        .isk-hour { color: #f472b6; font-weight: 700; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; }
+        .time-cell { color: var(--text-muted); font-family: 'Orbitron', sans-serif; font-size: 0.75rem; }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        .jumps-badge { background: rgba(139, 92, 246, 0.2); border: 1px solid rgba(139, 92, 246, 0.5); color: #a78bfa; }
+        .trips-badge { background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.5); color: var(--warning); }
+        .amount-badge { background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.5); color: var(--profit); }
+        .single-trip-badge { background: rgba(0, 212, 255, 0.2); border: 1px solid rgba(0, 212, 255, 0.5); color: var(--accent); font-size: 0.7rem; }
+
+        .efficiency-boost { color: var(--profit); font-size: 0.7rem; font-weight: 600; margin-left: 5px; }
+        .variant-label { font-size: 0.65rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
+        .full-order-label { font-size: 0.65rem; color: var(--text-muted); }
+
+        .trade-variant { background: rgba(0, 212, 255, 0.03); }
+        .trade-variant td { border-left: 2px solid var(--accent); }
+
+        .route { font-size: 0.75rem; color: var(--text-muted); }
+        .route-arrow { color: var(--accent); margin: 0 4px; }
+
+        .empty-state { text-align: center; padding: 50px; color: var(--text-muted); }
+        .empty-state h3 { font-family: 'Orbitron', sans-serif; margin-bottom: 8px; font-size: 1rem; }
+
+        .error-msg {
+            color: var(--danger);
+            font-size: 0.8rem;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .error-msg.show { display: block; }
+
+        @media (max-width: 1200px) {
+            .controls-row-main { grid-template-columns: 1fr; }
+            .form-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .form-grid, .form-grid-3 { grid-template-columns: 1fr; }
+            .stats { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>EVE TRADING TOOL</h1>
+            <p class="subtitle">Market Scanner & Profit Calculator</p>
+        </header>
+
+        <div class="controls-wrapper">
+            <!-- Row 1: Market Settings + Ship Parameters -->
+            <div class="controls-row-main">
+                <div class="control-panel">
+                    <div class="panel-header">
+                        <span class="panel-title">Market Settings</span>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Market Group</label>
+                            <select id="groupSelect">
+                                {% for key, group in groups.items() %}
+                                <option value="{{ group.id }}">{{ group.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Min Profit (ISK)</label>
+                            <input type="text" id="minProfit" value="10 000 000" placeholder="10 000 000">
+                        </div>
+                        <div class="form-group">
+                            <label>Cargo Capacity (m³)</label>
+                            <input type="text" id="cargoCapacity" value="830 000" placeholder="830 000">
+                        </div>
+                        <div class="form-group">
+                            <label>Max Budget (ISK)</label>
+                            <input type="text" id="maxBudget" value="500 000 000" placeholder="500 000 000">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-panel">
+                    <div class="panel-header">
+                        <span class="panel-title">Ship Parameters</span>
+                        <label class="panel-toggle">
+                            <input type="checkbox" id="enableShipParams" checked>
+                            <span>Enable Time Calc</span>
+                        </label>
+                    </div>
+                    <div class="panel-content" id="shipParamsContent">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Align Empty (s)</label>
+                                <input type="number" id="alignEmpty" value="22" step="0.5" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Align Full (s)</label>
+                                <input type="number" id="alignFull" value="44" step="0.5" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Warp Empty (AU/s)</label>
+                                <input type="number" id="warpEmpty" value="1.5" step="0.1" min="0.5">
+                            </div>
+                            <div class="form-group">
+                                <label>Warp Full (AU/s)</label>
+                                <input type="number" id="warpFull" value="1.5" step="0.1" min="0.5">
+                            </div>
+                        </div>
+                        <div class="info-text">💡 Get values from EFT/Pyfa. Full = with cargo expanders.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 2: Route & Trade Options -->
+            <div class="control-panel">
+                <div class="panel-header">
+                    <span class="panel-title">Route & Trade Options</span>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Route Safety</label>
+                        <select id="routeFlag">
+                            {% for key, name in route_options.items() %}
+                            <option value="{{ key }}">{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Trade Mode</label>
+                        <select id="tradeMode">
+                            {% for key, name in trade_modes.items() %}
+                            <option value="{{ key }}">{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Include Regions</label>
+                        <div class="checkbox-row">
+                            <div class="checkbox-item highsec">
+                                <input type="checkbox" id="regionHighsec" checked>
+                                <label for="regionHighsec">Highsec</label>
+                            </div>
+                            <div class="checkbox-item lowsec">
+                                <input type="checkbox" id="regionLowsec">
+                                <label for="regionLowsec">Lowsec</label>
+                            </div>
+                            <div class="checkbox-item nullsec">
+                                <input type="checkbox" id="regionNullsec">
+                                <label for="regionNullsec">Nullsec</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Gate Camp Check</label>
+                        <div class="toggle-row">
+                            <div class="toggle" id="checkCampsToggle" onclick="toggleCamps()"></div>
+                            <span id="campsLabel">Disabled</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scan Button -->
+        <div class="scan-btn-wrapper">
+            <button class="btn btn-primary" id="scanBtn" onclick="toggleScan()">Start Market Scan</button>
+            <div class="error-msg" id="errorMsg"></div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-dot idle" id="statusDot"></div>
+                <span id="statusText">Idle</span>
+            </div>
+            <div class="progress-wrapper">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+            </div>
+            <span class="current-item" id="currentItem"></span>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value" id="ordersCount">0</div>
+                    <div class="stat-label">Orders</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="tradesCount">0</div>
+                    <div class="stat-label">Trades</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="routesCount">0</div>
+                    <div class="stat-label">Routes</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sort Controls -->
+        <div class="sort-controls">
+            <span class="sort-label">Sort by:</span>
+            <button class="sort-btn active desc" data-sort="profit_per_hour" id="sortProfitHour">ISK/Hour <span class="sort-arrow">▼</span></button>
+            <button class="sort-btn desc" data-sort="profit_per_jump">ISK/Jump <span class="sort-arrow">▼</span></button>
+            <button class="sort-btn desc" data-sort="profit">Profit <span class="sort-arrow">▼</span></button>
+            <button class="sort-btn desc" data-sort="isk_per_m3">ISK/m³ <span class="sort-arrow">▼</span></button>
+            <button class="sort-btn asc" data-sort="jumps">Jumps <span class="sort-arrow">▼</span></button>
+            <button class="sort-btn asc" data-sort="trips">Trips <span class="sort-arrow">▼</span></button>
+            <button class="sort-btn desc" data-sort="cost">Cost <span class="sort-arrow">▼</span></button>
+        </div>
+
+        <!-- Trades Table -->
+        <table class="trades-table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Profit</th>
+                    <th id="timeHeader">Time</th>
+                    <th id="iskHourHeader">ISK/Hour</th>
+                    <th>Jumps</th>
+                    <th>Trips</th>
+                    <th>Amount</th>
+                    <th>Route</th>
+                </tr>
+            </thead>
+            <tbody id="tradesBody">
+                <tr>
+                    <td colspan="8">
+                        <div class="empty-state">
+                            <h3>No trades found</h3>
+                            <p>Configure settings and start a scan</p>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        let currentSort = 'profit_per_hour';
+        let sortDirection = 'desc'; // 'asc' or 'desc'
+        let isScanning = false;
+        let pollInterval;
+        let checkCamps = false;
+        let shipParamsEnabled = true;
+
+        // ========== Number Formatting ==========
+        
+        function formatNumberCompact(num) {
+            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+            return Math.round(num).toString();
+        }
+
+        function formatNumber(num) {
+            return formatNumberCompact(num);
+        }
+
+        function formatWithSpaces(num) {
+            if (num === '' || num === null || num === undefined || isNaN(num)) return '';
+            return Math.floor(Number(num)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+        }
+
+        function parseSpacedNumber(str) {
+            if (!str) return 0;
+            return parseFloat(str.toString().replace(/\s/g, '').replace(/,/g, '')) || 0;
+        }
+
+        // ========== Input Helpers ==========
+
+        function getInputValue(id, defaultVal) {
+            const el = document.getElementById(id);
+            if (!el) return defaultVal;
+            const val = parseSpacedNumber(el.value);
+            return val > 0 ? val : defaultVal;
+        }
+
+        function getCargoCapacity() { return getInputValue('cargoCapacity', 830000); }
+        function getBudget() { return getInputValue('maxBudget', Infinity); }
+        function getMinProfit() { return getInputValue('minProfit', 10000000); }
+
+        function getShipStats() {
+            return {
+                alignEmpty: parseFloat(document.getElementById('alignEmpty').value) || 22,
+                alignFull: parseFloat(document.getElementById('alignFull').value) || 44,
+                warpEmpty: parseFloat(document.getElementById('warpEmpty').value) || 1.5,
+                warpFull: parseFloat(document.getElementById('warpFull').value) || 1.5,
+                gateActivation: 10
+            };
+        }
+
+        function getSelectedRegions() {
+            const regions = [];
+            if (document.getElementById('regionHighsec').checked) regions.push('highsec');
+            if (document.getElementById('regionLowsec').checked) regions.push('lowsec');
+            if (document.getElementById('regionNullsec').checked) regions.push('nullsec');
+            return regions.length > 0 ? regions : ['highsec'];
+        }
+
+        // ========== UI Toggles ==========
+
+        function toggleCamps() {
+            checkCamps = !checkCamps;
+            document.getElementById('checkCampsToggle').classList.toggle('active', checkCamps);
+            document.getElementById('campsLabel').textContent = checkCamps ? 'Enabled' : 'Disabled';
+        }
+
+        function toggleShipParams() {
+            shipParamsEnabled = document.getElementById('enableShipParams').checked;
+            const content = document.getElementById('shipParamsContent');
+            content.classList.toggle('disabled', !shipParamsEnabled);
+            
+            // Update table headers and sort buttons
+            const timeHeader = document.getElementById('timeHeader');
+            const iskHourHeader = document.getElementById('iskHourHeader');
+            const sortProfitHour = document.getElementById('sortProfitHour');
+            
+            if (shipParamsEnabled) {
+                timeHeader.style.display = '';
+                iskHourHeader.style.display = '';
+                sortProfitHour.style.display = '';
+            } else {
+                timeHeader.style.display = 'none';
+                iskHourHeader.style.display = 'none';
+                sortProfitHour.style.display = 'none';
+                // Switch sort if currently on profit_per_hour
+                if (currentSort === 'profit_per_hour') {
+                    currentSort = 'profit_per_jump';
+                    sortDirection = 'desc';
+                    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+                    const newActiveBtn = document.querySelector('[data-sort="profit_per_jump"]');
+                    newActiveBtn.classList.add('active');
+                }
+            }
+            loadTrades();
+        }
+
+        // ========== Time Calculations ==========
+
+        const AVG_SYSTEM_SIZE_AU = 12;
+
+        function calculateWarpTime(distanceAU, warpSpeed, alignTime) {
+            if (distanceAU <= 0) return 0;
+            const minWarp = alignTime * 2 + 3;
+            if (distanceAU < 0.5) return minWarp;
+            const effectiveDistance = Math.max(0, distanceAU - 1.0);
+            const cruiseTime = effectiveDistance / warpSpeed;
+            return alignTime + cruiseTime + alignTime + 3;
+        }
+
+        function calculateTripTime(jumps, shipStats, isLoaded) {
+            const alignTime = isLoaded ? shipStats.alignFull : shipStats.alignEmpty;
+            const warpSpeed = isLoaded ? shipStats.warpFull : shipStats.warpEmpty;
+            let totalTime = 0;
+            for (let i = 0; i < jumps; i++) {
+                totalTime += shipStats.gateActivation;
+                totalTime += calculateWarpTime(AVG_SYSTEM_SIZE_AU, warpSpeed, alignTime);
+            }
+            totalTime += 20; // Undock/dock
+            return totalTime;
+        }
+
+        function calculateRoundTripTime(jumps, trips, shipStats) {
+            const outbound = calculateTripTime(jumps, shipStats, false);
+            const returnTrip = calculateTripTime(jumps, shipStats, true);
+            return (outbound + returnTrip) * trips;
+        }
+
+        function formatTime(seconds) {
+            if (!seconds || !shipParamsEnabled) return '-';
+            if (seconds < 60) return `${Math.round(seconds)}s`;
+            if (seconds < 3600) {
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.round(seconds % 60);
+                return `${mins}m ${secs}s`;
+            }
+            const hours = Math.floor(seconds / 3600);
+            const mins = Math.floor((seconds % 3600) / 60);
+            return `${hours}h ${mins}m`;
+        }
+
+        // ========== Trade Processing ==========
+
+        function adjustTradeForBudget(trade, budget, cargoCapacity, shipStats) {
+            const costPerUnit = trade.buy_price;
+            const profitPerUnit = trade.sell_price - trade.buy_price;
+            const volumePerUnit = trade.volume_m3 / trade.amount;
+            
+            const maxAffordable = Math.floor(budget / costPerUnit);
+            const adjustedAmount = Math.min(trade.amount, maxAffordable);
+            
+            if (adjustedAmount <= 0) return [];
+            
+            const adjustedCost = adjustedAmount * costPerUnit;
+            const adjustedProfit = adjustedAmount * profitPerUnit;
+            const adjustedVolume = adjustedAmount * volumePerUnit;
+            const adjustedTrips = Math.ceil(adjustedVolume / cargoCapacity);
+            const adjustedTotalJumps = trade.jumps * 2 * adjustedTrips;
+            const adjustedProfitPerJump = adjustedTotalJumps > 0 ? adjustedProfit / adjustedTotalJumps : adjustedProfit;
+            const adjustedIskPerM3 = adjustedVolume > 0 ? adjustedProfit / adjustedVolume : 0;
+            
+            let adjustedTime = 0;
+            let adjustedProfitPerHour = 0;
+            if (shipParamsEnabled) {
+                adjustedTime = calculateRoundTripTime(trade.jumps, adjustedTrips, shipStats);
+                adjustedProfitPerHour = adjustedTime > 0 ? (adjustedProfit / adjustedTime) * 3600 : 0;
+            }
+            
+            const results = [];
+            
+            results.push({
+                ...trade,
+                amount: adjustedAmount,
+                cost: adjustedCost,
+                profit: adjustedProfit,
+                volume_m3: adjustedVolume,
+                trips: adjustedTrips,
+                total_jumps: adjustedTotalJumps,
+                profit_per_jump: adjustedProfitPerJump,
+                isk_per_m3: adjustedIskPerM3,
+                time_seconds: adjustedTime,
+                profit_per_hour: adjustedProfitPerHour,
+                original_amount: trade.amount,
+                variant: 'full',
+                has_single_trip_option: adjustedTrips > 1
+            });
+            
+            if (adjustedTrips > 1) {
+                const maxUnitsPerTrip = Math.floor(cargoCapacity / volumePerUnit);
+                const singleTripAmount = Math.min(maxUnitsPerTrip, adjustedAmount);
+                const budgetLimitedAmount = Math.floor(budget / costPerUnit);
+                const finalSingleTripAmount = Math.min(singleTripAmount, budgetLimitedAmount);
+                
+                if (finalSingleTripAmount > 0) {
+                    const singleTripCost = finalSingleTripAmount * costPerUnit;
+                    const singleTripProfit = finalSingleTripAmount * profitPerUnit;
+                    const singleTripVolume = finalSingleTripAmount * volumePerUnit;
+                    const singleTripTotalJumps = trade.jumps * 2;
+                    const singleTripProfitPerJump = singleTripTotalJumps > 0 ? singleTripProfit / singleTripTotalJumps : singleTripProfit;
+                    const singleTripIskPerM3 = singleTripVolume > 0 ? singleTripProfit / singleTripVolume : 0;
+                    
+                    let singleTripTime = 0;
+                    let singleTripProfitPerHour = 0;
+                    if (shipParamsEnabled) {
+                        singleTripTime = calculateRoundTripTime(trade.jumps, 1, shipStats);
+                        singleTripProfitPerHour = singleTripTime > 0 ? (singleTripProfit / singleTripTime) * 3600 : 0;
+                    }
+                    
+                    const efficiencyBoost = adjustedProfitPerHour > 0 ? 
+                        ((singleTripProfitPerHour / adjustedProfitPerHour) - 1) * 100 : 
+                        ((singleTripProfitPerJump / adjustedProfitPerJump) - 1) * 100;
+                    
+                    results.push({
+                        ...trade,
+                        amount: finalSingleTripAmount,
+                        cost: singleTripCost,
+                        profit: singleTripProfit,
+                        volume_m3: singleTripVolume,
+                        trips: 1,
+                        total_jumps: singleTripTotalJumps,
+                        profit_per_jump: singleTripProfitPerJump,
+                        isk_per_m3: singleTripIskPerM3,
+                        time_seconds: singleTripTime,
+                        profit_per_hour: singleTripProfitPerHour,
+                        original_amount: trade.amount,
+                        variant: 'single_trip',
+                        efficiency_boost: efficiencyBoost,
+                        full_trips: adjustedTrips
+                    });
+                }
+            }
+            
+            return results;
+        }
+
+        // ========== Validation ==========
+
+        function validateFields() {
+            let valid = true;
+            const errors = [];
+            
+            const minProfit = getMinProfit();
+            const cargo = getCargoCapacity();
+            const budget = getBudget();
+            
+            document.querySelectorAll('input.error').forEach(el => el.classList.remove('error'));
+            
+            if (minProfit <= 0) {
+                document.getElementById('minProfit').classList.add('error');
+                errors.push('Min Profit must be greater than 0');
+                valid = false;
+            }
+            
+            if (cargo <= 0) {
+                document.getElementById('cargoCapacity').classList.add('error');
+                errors.push('Cargo Capacity must be greater than 0');
+                valid = false;
+            }
+            
+            if (budget <= 0) {
+                document.getElementById('maxBudget').classList.add('error');
+                errors.push('Max Budget must be greater than 0');
+                valid = false;
+            }
+            
+            const errorMsg = document.getElementById('errorMsg');
+            if (errors.length > 0) {
+                errorMsg.textContent = errors.join('. ');
+                errorMsg.classList.add('show');
+            } else {
+                errorMsg.classList.remove('show');
+            }
+            
+            return valid;
+        }
+
+        // ========== Scanning ==========
+
+        async function toggleScan() {
+            if (isScanning) {
+                await stopScan();
+            } else {
+                if (validateFields()) {
+                    await startScan();
+                }
+            }
+        }
+
+        async function startScan() {
+            const response = await fetch('/api/scan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    group_id: document.getElementById('groupSelect').value,
+                    min_profit: getMinProfit(),
+                    cargo_capacity: getCargoCapacity(),
+                    regions: getSelectedRegions(),
+                    route_flag: document.getElementById('routeFlag').value,
+                    trade_mode: document.getElementById('tradeMode').value,
+                    check_camps: checkCamps
+                })
+            });
+
+            if (response.ok) {
+                isScanning = true;
+                updateScanButton();
+                startPolling();
+            }
+        }
+
+        async function stopScan() {
+            await fetch('/api/stop');
+            isScanning = false;
+            clearInterval(pollInterval);
+            updateScanButton();
+            updateStatusDisplay('stopped', 0, '');
+        }
+
+        function updateScanButton() {
+            const btn = document.getElementById('scanBtn');
+            if (isScanning) {
+                btn.textContent = '⏹ Stop Scan';
+                btn.classList.add('btn-stop');
+            } else {
+                btn.textContent = 'Start Market Scan';
+                btn.classList.remove('btn-stop');
+            }
+        }
+
+        function startPolling() {
+            pollInterval = setInterval(updateStatus, 1000);
+        }
+
+        function updateStatusDisplay(status, progress, currentItem) {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            const progressBar = document.getElementById('progressBar');
+            const currentItemEl = document.getElementById('currentItem');
+            
+            statusDot.className = 'status-dot ' + status;
+            statusText.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+            progressBar.style.width = progress + '%';
+            currentItemEl.textContent = currentItem;
+        }
+
+        async function updateStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+
+                updateStatusDisplay(data.status, data.progress, data.current_item);
+
+                document.getElementById('ordersCount').textContent = formatNumber(data.orders);
+                document.getElementById('tradesCount').textContent = formatNumber(data.trades);
+                document.getElementById('routesCount').textContent = formatNumber(data.cached_routes);
+
+                if (data.status === 'complete' || data.status === 'error' || data.status === 'stopped') {
+                    clearInterval(pollInterval);
+                    isScanning = false;
+                    updateScanButton();
+                    loadTrades();
+                }
+
+                if (data.trades > 0) {
+                    loadTrades();
+                }
+            } catch (e) {
+                console.error('Status update failed:', e);
+            }
+        }
+
+        // ========== Load Trades ==========
+
+        async function loadTrades() {
+            try {
+                const response = await fetch('/api/trades?sort=profit&limit=500');
+                let rawTrades = await response.json();
+                
+                const budget = getBudget();
+                const cargoCapacity = getCargoCapacity();
+                const shipStats = getShipStats();
+                
+                let allTrades = [];
+                rawTrades.forEach(trade => {
+                    const variants = adjustTradeForBudget(trade, budget, cargoCapacity, shipStats);
+                    variants.forEach(v => {
+                        if (v.profit > 0) allTrades.push(v);
+                    });
+                });
+                
+                // Sort with direction
+                allTrades.sort((a, b) => {
+                    const valA = a[currentSort] || 0;
+                    const valB = b[currentSort] || 0;
+                    return sortDirection === 'desc' ? valB - valA : valA - valB;
+                });
+                allTrades = allTrades.slice(0, 150);
+
+                renderTrades(allTrades);
+            } catch (e) {
+                console.error('Load trades failed:', e);
+            }
+        }
+
+        function renderTrades(trades) {
+            const tbody = document.getElementById('tradesBody');
+            const showTime = shipParamsEnabled;
+            
+            if (trades.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8">
+                            <div class="empty-state">
+                                <h3>No trades found</h3>
+                                <p>Configure settings and start a scan</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = trades.map(trade => {
+                const isSingleTrip = trade.variant === 'single_trip';
+                const rowClass = isSingleTrip ? 'trade-variant' : '';
+                
+                let itemLabel = trade.type_name;
+                let tripsBadge = `<span class="badge trips-badge">${trade.trips}x</span>`;
+                
+                if (isSingleTrip) {
+                    itemLabel = `<span class="variant-label">⚡ 1-TRIP</span> ${trade.type_name}`;
+                    tripsBadge = `<span class="badge single-trip-badge">1x</span><span class="efficiency-boost">+${trade.efficiency_boost.toFixed(0)}%</span>`;
+                } else if (trade.has_single_trip_option) {
+                    itemLabel = `<span class="full-order-label">FULL</span> ${trade.type_name}`;
+                }
+                
+                const timeCell = showTime ? `<td class="time-cell">${formatTime(trade.time_seconds)}</td>` : '';
+                const iskHourCell = showTime ? `<td class="isk-hour">${formatNumber(trade.profit_per_hour)}/h</td>` : '';
+                
+                return `
+                <tr class="${rowClass}">
+                    <td class="item-name" title="${trade.type_name}">${itemLabel}</td>
+                    <td class="profit">${formatNumber(trade.profit)}</td>
+                    ${timeCell}
+                    ${iskHourCell}
+                    <td><span class="badge jumps-badge">${trade.jumps}j</span></td>
+                    <td>${tripsBadge}</td>
+                    <td><span class="badge amount-badge">${trade.amount.toLocaleString()}${trade.original_amount > trade.amount ? '/' + trade.original_amount.toLocaleString() : ''}</span></td>
+                    <td class="route">
+                        <span title="${trade.from_station_name}">${truncate(trade.from_station_name, 15)}</span>
+                        <span class="route-arrow">→</span>
+                        <span title="${trade.to_station_name}">${truncate(trade.to_station_name, 15)}</span>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        function truncate(str, len) {
+            if (!str) return 'Unknown';
+            return str.length > len ? str.substring(0, len) + '...' : str;
+        }
+
+        // ========== Input Formatting ==========
+
+        function setupFormattedInput(id) {
+            const input = document.getElementById(id);
+            if (!input) return;
+
+            input.addEventListener('blur', function() {
+                const val = parseSpacedNumber(this.value);
+                if (val > 0) {
+                    this.value = formatWithSpaces(val);
+                }
+            });
+
+            input.addEventListener('focus', function() {
+                const val = parseSpacedNumber(this.value);
+                if (val > 0) {
+                    this.value = val;
+                }
+            });
+        }
+
+        // ========== Initialization ==========
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Setup formatted inputs
+            setupFormattedInput('minProfit');
+            setupFormattedInput('cargoCapacity');
+            setupFormattedInput('maxBudget');
+
+            // Ship params toggle
+            document.getElementById('enableShipParams').addEventListener('change', toggleShipParams);
+
+            // Sort buttons with direction toggle
+            document.querySelectorAll('.sort-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const sortKey = btn.dataset.sort;
+                    
+                    if (currentSort === sortKey) {
+                        // Toggle direction if clicking same button
+                        sortDirection = sortDirection === 'desc' ? 'asc' : 'desc';
+                        btn.classList.toggle('desc', sortDirection === 'desc');
+                        btn.classList.toggle('asc', sortDirection === 'asc');
+                    } else {
+                        // New sort column - use button's default direction
+                        document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        currentSort = sortKey;
+                        // Get default direction from button class
+                        sortDirection = btn.classList.contains('asc') ? 'asc' : 'desc';
+                    }
+                    loadTrades();
+                });
+            });
+
+            // Reload on settings change
+            ['maxBudget', 'cargoCapacity', 'alignEmpty', 'alignFull', 'warpEmpty', 'warpFull'].forEach(id => {
+                document.getElementById(id).addEventListener('change', loadTrades);
+            });
+
+            // Initial load
+            loadTrades();
+            updateStatus();
+        });
+    </script>
+</body>
+</html>
