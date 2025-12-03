@@ -11,14 +11,25 @@ app.secret_key = secrets.token_hex(32)  # For session management
 
 # Market group presets
 MARKET_GROUPS = {
-    'materials': {'id': 533, 'name': 'Materials'},
-    'ships': {'id': 4, 'name': 'Ships'},
-    'ship_equipment': {'id': 9, 'name': 'Ship Equipment'},
+    'ammunition': {'id': 11, 'name': 'Ammunition & Charges'},
+    'apparel': {'id': 1396, 'name': 'Apparel'},
+    'blueprints': {'id': 2, 'name': 'Blueprints & Reactions'},
     'drones': {'id': 157, 'name': 'Drones'},
     'implants': {'id': 24, 'name': 'Implants & Boosters'},
     'manufacture': {'id': 475, 'name': 'Manufacture & Research'},
-    'modifications': {'id': 955, 'name': 'Ship Modifications'},
-    'pilot_services': {'id': 1922, 'name': "Pilot's Services"}
+    'personalization': {'id': 3628, 'name': 'Personalization'},
+    'pilot_services': {'id': 1922, 'name': "Pilot's Services"},
+    'planetary': {'id': 1320, 'name': 'Planetary Infrastructure'},
+    'ship_equipment': {'id': 9, 'name': 'Ship Equipment'},
+    'ship_skins': {'id': 1954, 'name': 'Ship SKINs'},
+    'modifications': {'id': 955, 'name': 'Ship & Module Modifications'},
+    'ships': {'id': 4, 'name': 'Ships'},
+    'skills': {'id': 150, 'name': 'Skills'},
+    'special_edition': {'id': 1659, 'name': 'Special Edition Assets'},
+    'structure_equipment': {'id': 2202, 'name': 'Structure Equipment'},
+    'structure_mods': {'id': 2203, 'name': 'Structure Modifications'},
+    'structures': {'id': 477, 'name': 'Structures'},
+    'trade_goods': {'id': 19, 'name': 'Trade Goods'},
 }
 
 # Route safety options
@@ -342,6 +353,15 @@ def get_trades():
 def stop_scan():
     scanner.status = 'stopped'
     return jsonify({'status': 'stopped'})
+
+
+@app.route('/api/clear_db', methods=['POST'])
+def clear_db():
+    """Clear the database (orders and trades)."""
+    from database import clear_orders, clear_trades
+    clear_orders()
+    clear_trades()
+    return jsonify({'status': 'cleared'})
 
 
 @app.route('/api/calculate_distances', methods=['POST'])

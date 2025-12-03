@@ -162,9 +162,19 @@
 
         .checkbox-col {
             display: flex;
+            flex-direction: row;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .form-group.checkbox-group {
+            display: flex;
             flex-direction: column;
-            gap: 4px;
-            padding-top: 2px;
+            justify-content: center;
+        }
+        
+        .form-group.checkbox-group label:first-child {
+            margin-bottom: 8px;
         }
 
         /* Security status dots */
@@ -411,15 +421,26 @@
         
         .sync-btns {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            grid-column: span 2;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            grid-column: span 3;
         }
         
         .sync-btn-inline:hover {
             border-color: var(--accent);
             background: rgba(0, 212, 255, 0.1);
             color: var(--accent);
+        }
+        
+        .sync-btn-inline.danger {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+        
+        .sync-btn-inline.danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--danger);
+            color: var(--danger);
         }
         
         /* Settings Form in Right Panel */
@@ -610,7 +631,8 @@
         .stat-value { font-family: 'Orbitron', sans-serif; font-size: 1rem; color: var(--accent); }
         .stat-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; }
 
-        .data-age .stat-value { transition: color 0.3s; }
+        .data-age { min-width: 70px; }
+        .data-age .stat-value { transition: color 0.3s; min-width: 50px; text-align: center; }
         .data-age.fresh .stat-value { color: var(--profit); }
         .data-age.stale .stat-value { color: var(--warning); }
         .data-age.old .stat-value { color: var(--danger); }
@@ -1385,11 +1407,11 @@
                         </div>
                         <div class="form-group">
                             <label>Min Profit (M)</label>
-                            <input type="number" id="minProfit" value="10" placeholder="10" step="1" min="1">
+                            <input type="text" id="minProfit" value="10" placeholder="10">
                         </div>
                         <div class="form-group">
                             <label>Max Budget (M)</label>
-                            <input type="number" id="maxBudget" value="500" placeholder="500" step="10" min="1">
+                            <input type="text" id="maxBudget" value="500" placeholder="500">
                         </div>
                         <div class="form-group">
                             <label>Max Cargo (M3)</label>
@@ -1401,15 +1423,16 @@
                         </div>
                         <div class="form-group">
                             <label>Max Trips</label>
-                            <input type="number" id="maxTrips" value="" placeholder="-" step="1" min="1">
+                            <input type="text" id="maxTrips" value="" placeholder="-">
                         </div>
                         <div class="form-group">
                             <label>Max Jumps</label>
-                            <input type="number" id="maxJumps" value="" placeholder="-" step="1" min="1">
+                            <input type="text" id="maxJumps" value="" placeholder="-">
                         </div>
                         <div class="form-group sync-btns">
                             <button class="sync-btn-inline" id="btnSyncWallet" onclick="syncWallet()">Sync Wallet</button>
                             <button class="sync-btn-inline" id="btnSyncCargo" onclick="syncCargo()">Sync Cargo</button>
+                            <button class="sync-btn-inline danger" id="btnClearDB" onclick="clearDatabase()">Clear DB</button>
                         </div>
                     </div>
                 </div>
@@ -1437,7 +1460,7 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group checkbox-group">
                         <label>Include Regions</label>
                         <div class="checkbox-col">
                             <div class="checkbox-item highsec">
@@ -1595,6 +1618,7 @@
         let characterStatusInterval = null;
         let lastUpdatedTimestamp = null;
         let dataAgeInterval = null;
+        let lastKnownWallet = null;
 
         // ========== Number Formatting ==========
         
@@ -1807,6 +1831,10 @@
         }
 
         async function startScan() {
+            // Clear trades display immediately when starting new scan
+            allTradesCache = [];
+            renderTrades([]);
+            
             const response = await fetch('/api/scan', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -2314,10 +2342,15 @@
                 shipEl.textContent = `${data.ship_type_name} "${data.ship_name}"`;
             }
             
-            // Update wallet
+            // Update wallet (preserve last value if new value is 0 or missing)
             const walletEl = document.getElementById('charWallet');
             if (walletEl) {
-                walletEl.textContent = formatNumberCompact(data.wallet);
+                if (data.wallet && data.wallet > 0) {
+                    lastKnownWallet = data.wallet;
+                    walletEl.textContent = formatNumberCompact(data.wallet);
+                } else if (lastKnownWallet) {
+                    walletEl.textContent = formatNumberCompact(lastKnownWallet);
+                }
             }
             
             // Update fees
@@ -2367,6 +2400,21 @@
             }
         }
 
+        async function clearDatabase() {
+            try {
+                const response = await fetch('/api/clear_db', { method: 'POST' });
+                if (response.ok) {
+                    allTradesCache = [];
+                    renderTrades([]);
+                    selectedDeal = null;
+                    updateSelectedDealUI();
+                    showButtonFeedback('btnClearDB');
+                }
+            } catch (e) {
+                console.error('Failed to clear database:', e);
+            }
+        }
+
         function showButtonFeedback(btnId) {
             const btn = document.getElementById(btnId);
             if (btn) {
@@ -2387,6 +2435,9 @@
         function selectDeal(index) {
             const trade = allTradesCache[index];
             if (!trade) return;
+            
+            // Immediately clear route warning before recalculation
+            clearRouteWarning();
             
             selectedDeal = trade;
             selectedDeal.route_warning = null; // Reset warning
@@ -2437,13 +2488,13 @@
             } else if (data.safe) {
                 warningEl.style.display = 'block';
                 warningEl.className = 'route-warning safe';
-                warningEl.innerHTML = `<span class="safe-icon">[OK]</span> Route is safe (highsec only)`;
+                warningEl.innerHTML = `Route is safe (highsec only)`;
             } else {
                 const systems = data.dangerous_systems || [];
                 const names = systems.map(s => `${s.name} (${s.security})`).join(', ');
                 warningEl.style.display = 'block';
                 warningEl.className = 'route-warning danger';
-                warningEl.innerHTML = `<span class="warning-icon">[!]</span> Route passes through: ${names}`;
+                warningEl.innerHTML = `Dangerous systems: ${names}`;
             }
         }
         
