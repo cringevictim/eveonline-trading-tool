@@ -1,6 +1,7 @@
 import aiohttp
 import asyncio
 import math
+import time
 from database import insert_orders_batch, insert_trade, clear_orders, clear_trades, get_db
 from pathfinder import batch_get_jumps
 
@@ -26,6 +27,7 @@ class MarketScanner:
         self.current_item = ""
         self.total_items = 0
         self.scanned_items = 0
+        self.last_updated = None  # Timestamp when scan completed
         self.settings = {
             'min_profit': 10_000_000,
             'cargo_capacity': 830000,
@@ -141,6 +143,7 @@ class MarketScanner:
         
         self.status = "complete"
         self.progress = 100
+        self.last_updated = time.time()  # Record when scan completed
     
     async def process_item(self, session, item):
         """Process a single item type"""
@@ -289,172 +292,398 @@ class MarketScanner:
             insert_trade(trade_data)
     
     def _find_instant_trades(self, sell_orders, buy_orders, min_profit, item_volume):
-        """Find instant trades: buy from sell orders, sell to buy orders"""
-        trades = []
-        for sell in sell_orders:
-            for buy in buy_orders:
-                if sell['price'] >= buy['price']:
+        """Find instant trades: buy from sell orders, sell to buy orders
+        
+        FIXED algorithm - properly walks order books:
+        1. Group orders by station
+        2. Sort by price (sells ASC, buys DESC)
+        3. Walk BOTH order books to match actual volumes at actual prices
+        4. Calculate profit respecting individual order limits
+        """
+        if not sell_orders or not buy_orders:
+            return []
+        
+        # Fees
+        broker_fee = 0.03
+        sales_tax = 0.036
+        
+        # 1. Group orders by station
+        sells_by_station = {}
+        for order in sell_orders:
+            sid = order['station_id']
+            if sid not in sells_by_station:
+                sells_by_station[sid] = {
+                    'orders': [],
+                    'system_id': order['system_id'],
+                    'station_name': order['station_name'],
+                    'security': order.get('security', 0)
+                }
+            sells_by_station[sid]['orders'].append(order)
+        
+        buys_by_station = {}
+        for order in buy_orders:
+            sid = order['station_id']
+            if sid not in buys_by_station:
+                buys_by_station[sid] = {
+                    'orders': [],
+                    'system_id': order['system_id'],
+                    'station_name': order['station_name'],
+                    'security': order.get('security', 0)
+                }
+            buys_by_station[sid]['orders'].append(order)
+        
+        # 2. Sort orders - sells cheapest first, buys highest first
+        for sid in sells_by_station:
+            sells_by_station[sid]['orders'].sort(key=lambda x: x['price'])
+        for sid in buys_by_station:
+            buys_by_station[sid]['orders'].sort(key=lambda x: -x['price'])
+        
+        # 3. Walk order books to find profitable matches
+        trades = {}
+        
+        for sell_station, sell_data in sells_by_station.items():
+            sell_orders_list = sell_data['orders']
+            
+            for buy_station, buy_data in buys_by_station.items():
+                if sell_station == buy_station:
                     continue
                 
-                volume = min(sell['volume'], buy['volume'])
-                profit = int((buy['price'] - sell['price']) * volume)
+                buy_orders_list = buy_data['orders']
                 
-                if profit < min_profit:
+                # Walk both order books to match volumes at actual prices
+                total_volume = 0
+                total_buy_cost = 0
+                total_sell_revenue = 0
+                
+                # Make copies of volumes to track remaining
+                sell_remaining = [o['volume'] for o in sell_orders_list]
+                buy_remaining = [o['volume'] for o in buy_orders_list]
+                
+                sell_idx = 0
+                buy_idx = 0
+                
+                while sell_idx < len(sell_orders_list) and buy_idx < len(buy_orders_list):
+                    sell_price = sell_orders_list[sell_idx]['price']
+                    buy_price = buy_orders_list[buy_idx]['price']
+                    
+                    # Stop if no longer profitable
+                    if sell_price >= buy_price:
+                        break
+                    
+                    # Trade minimum of available volumes
+                    trade_vol = min(sell_remaining[sell_idx], buy_remaining[buy_idx])
+                    
+                    if trade_vol > 0:
+                        total_volume += trade_vol
+                        total_buy_cost += sell_price * trade_vol
+                        total_sell_revenue += buy_price * trade_vol
+                        
+                        sell_remaining[sell_idx] -= trade_vol
+                        buy_remaining[buy_idx] -= trade_vol
+                    
+                    # Move to next order if exhausted
+                    if sell_remaining[sell_idx] <= 0:
+                        sell_idx += 1
+                    if buy_remaining[buy_idx] <= 0:
+                        buy_idx += 1
+                
+                if total_volume == 0:
                     continue
                 
-                trades.append({
-                    'buy_price': sell['price'],
-                    'sell_price': buy['price'],
-                    'volume': volume,
-                    'profit': profit,
-                    'origin': sell['system_id'],
-                    'origin_station': sell['station_id'],
-                    'origin_name': sell['station_name'],
-                    'origin_security': sell.get('security', 0),
-                    'dest': buy['system_id'],
-                    'dest_station': buy['station_id'],
-                    'dest_name': buy['station_name'],
-                    'dest_security': buy.get('security', 0)
-                })
-        return trades
+                # Calculate profit with fees
+                gross_profit = total_sell_revenue - total_buy_cost
+                buy_fees = total_buy_cost * broker_fee
+                sell_fees = total_sell_revenue * (broker_fee + sales_tax)
+                net_profit = gross_profit - buy_fees - sell_fees
+                
+                if net_profit < min_profit:
+                    continue
+                
+                # Average prices for display
+                avg_buy_price = total_buy_cost / total_volume
+                avg_sell_price = total_sell_revenue / total_volume
+                
+                key = (sell_station, buy_station)
+                if key not in trades or net_profit > trades[key]['profit']:
+                    trades[key] = {
+                        'buy_price': avg_buy_price,
+                        'sell_price': avg_sell_price,
+                        'volume': int(total_volume),
+                        'profit': int(net_profit),
+                        'origin': sell_data['system_id'],
+                        'origin_station': sell_station,
+                        'origin_name': sell_data['station_name'],
+                        'origin_security': sell_data['security'],
+                        'dest': buy_data['system_id'],
+                        'dest_station': buy_station,
+                        'dest_name': buy_data['station_name'],
+                        'dest_security': buy_data['security']
+                    }
+        
+        return list(trades.values())
     
     def _find_buy_order_trades(self, sell_orders, buy_orders, min_profit, item_volume):
-        """Find trades using buy orders: place buy order cheaper than sell orders, sell to buy orders"""
-        trades = []
+        """Find trades using buy orders: place buy order cheaper than sell orders, sell to buy orders
+        
+        Strategy: Undercut existing sell orders with a buy order, then haul to sell
+        """
         if not sell_orders or not buy_orders:
-            return trades
+            return []
         
-        # Get lowest sell price per station to undercut
-        station_min_sell = {}
-        for sell in sell_orders:
-            key = sell['station_id']
-            if key not in station_min_sell or sell['price'] < station_min_sell[key]['price']:
-                station_min_sell[key] = sell
+        broker_fee = 0.03
+        sales_tax = 0.036
         
-        # For each location with sell orders, calculate potential profit
-        # by placing a buy order slightly below the sell price
-        for station_id, sell in station_min_sell.items():
-            # Place buy order at 95% of sell price
-            buy_order_price = sell['price'] * 0.95
+        # Group sells by station, get lowest price per station
+        sells_by_station = {}
+        for order in sell_orders:
+            sid = order['station_id']
+            if sid not in sells_by_station:
+                sells_by_station[sid] = {
+                    'orders': [],
+                    'system_id': order['system_id'],
+                    'station_name': order['station_name'],
+                    'security': order.get('security', 0)
+                }
+            sells_by_station[sid]['orders'].append(order)
+        
+        # Group buys by station
+        buys_by_station = {}
+        for order in buy_orders:
+            sid = order['station_id']
+            if sid not in buys_by_station:
+                buys_by_station[sid] = {
+                    'orders': [],
+                    'system_id': order['system_id'],
+                    'station_name': order['station_name'],
+                    'security': order.get('security', 0)
+                }
+            buys_by_station[sid]['orders'].append(order)
+        
+        # Sort buys highest first
+        for sid in buys_by_station:
+            buys_by_station[sid]['orders'].sort(key=lambda x: -x['price'])
+        
+        trades = {}
+        
+        for sell_station, sell_data in sells_by_station.items():
+            # Get lowest sell price to undercut
+            min_sell_price = min(o['price'] for o in sell_data['orders'])
+            total_sell_vol = sum(o['volume'] for o in sell_data['orders'])
             
-            for buy in buy_orders:
-                if buy_order_price >= buy['price']:
+            # Place buy order at 95% of lowest sell
+            buy_order_price = min_sell_price * 0.95
+            
+            for buy_station, buy_data in buys_by_station.items():
+                best_buy_price = buy_data['orders'][0]['price']
+                total_buy_vol = sum(o['volume'] for o in buy_data['orders'])
+                
+                if buy_order_price >= best_buy_price:
                     continue
                 
-                volume = min(sell['volume'], buy['volume'])
-                profit = int((buy['price'] - buy_order_price) * volume)
+                volume = min(total_sell_vol, total_buy_vol)
                 
-                if profit < min_profit:
+                # Calculate with fees
+                gross = (best_buy_price - buy_order_price) * volume
+                fees = (buy_order_price * volume * broker_fee) + \
+                       (best_buy_price * volume * (broker_fee + sales_tax))
+                net_profit = gross - fees
+                
+                if net_profit < min_profit:
                     continue
                 
-                trades.append({
-                    'buy_price': buy_order_price,
-                    'sell_price': buy['price'],
-                    'volume': volume,
-                    'profit': profit,
-                    'origin': sell['system_id'],
-                    'origin_station': sell['station_id'],
-                    'origin_name': sell['station_name'] + ' (Buy Order)',
-                    'origin_security': sell.get('security', 0),
-                    'dest': buy['system_id'],
-                    'dest_station': buy['station_id'],
-                    'dest_name': buy['station_name'],
-                    'dest_security': buy.get('security', 0)
-                })
-        return trades
+                key = (sell_station, buy_station)
+                if key not in trades or net_profit > trades[key]['profit']:
+                    trades[key] = {
+                        'buy_price': buy_order_price,
+                        'sell_price': best_buy_price,
+                        'volume': int(volume),
+                        'profit': int(net_profit),
+                        'origin': sell_data['system_id'],
+                        'origin_station': sell_station,
+                        'origin_name': sell_data['station_name'] + ' [BUY ORDER]',
+                        'origin_security': sell_data['security'],
+                        'dest': buy_data['system_id'],
+                        'dest_station': buy_station,
+                        'dest_name': buy_data['station_name'],
+                        'dest_security': buy_data['security']
+                    }
+        
+        return list(trades.values())
     
     def _find_sell_order_trades(self, sell_orders, buy_orders, min_profit, item_volume):
-        """Find trades using sell orders: buy from sell orders, place sell order higher than buy orders"""
-        trades = []
+        """Find trades using sell orders: buy from sell orders, place sell order higher than buy orders
+        
+        Strategy: Buy instantly, haul, then place sell order above existing buys
+        """
         if not sell_orders or not buy_orders:
-            return trades
+            return []
         
-        # Get highest buy price per station
-        station_max_buy = {}
-        for buy in buy_orders:
-            key = buy['station_id']
-            if key not in station_max_buy or buy['price'] > station_max_buy[key]['price']:
-                station_max_buy[key] = buy
+        broker_fee = 0.03
+        sales_tax = 0.036
         
-        for sell in sell_orders:
-            for station_id, buy in station_max_buy.items():
-                # Place sell order at 105% of buy price
-                sell_order_price = buy['price'] * 1.05
+        # Group sells by station
+        sells_by_station = {}
+        for order in sell_orders:
+            sid = order['station_id']
+            if sid not in sells_by_station:
+                sells_by_station[sid] = {
+                    'orders': [],
+                    'system_id': order['system_id'],
+                    'station_name': order['station_name'],
+                    'security': order.get('security', 0)
+                }
+            sells_by_station[sid]['orders'].append(order)
+        
+        # Sort sells cheapest first
+        for sid in sells_by_station:
+            sells_by_station[sid]['orders'].sort(key=lambda x: x['price'])
+        
+        # Group buys by station, get highest price per station
+        buys_by_station = {}
+        for order in buy_orders:
+            sid = order['station_id']
+            if sid not in buys_by_station:
+                buys_by_station[sid] = {
+                    'orders': [],
+                    'system_id': order['system_id'],
+                    'station_name': order['station_name'],
+                    'security': order.get('security', 0)
+                }
+            buys_by_station[sid]['orders'].append(order)
+        
+        trades = {}
+        
+        for sell_station, sell_data in sells_by_station.items():
+            best_sell_price = sell_data['orders'][0]['price']
+            total_sell_vol = sum(o['volume'] for o in sell_data['orders'])
+            
+            for buy_station, buy_data in buys_by_station.items():
+                # Get highest buy price to place above
+                max_buy_price = max(o['price'] for o in buy_data['orders'])
+                total_buy_vol = sum(o['volume'] for o in buy_data['orders'])
                 
-                if sell['price'] >= sell_order_price:
+                # Place sell order at 105% of highest buy
+                sell_order_price = max_buy_price * 1.05
+                
+                if best_sell_price >= sell_order_price:
                     continue
                 
-                volume = min(sell['volume'], buy['volume'])
-                profit = int((sell_order_price - sell['price']) * volume)
+                volume = min(total_sell_vol, total_buy_vol)
                 
-                if profit < min_profit:
+                # Calculate with fees
+                gross = (sell_order_price - best_sell_price) * volume
+                fees = (best_sell_price * volume * broker_fee) + \
+                       (sell_order_price * volume * (broker_fee + sales_tax))
+                net_profit = gross - fees
+                
+                if net_profit < min_profit:
                     continue
                 
-                trades.append({
-                    'buy_price': sell['price'],
-                    'sell_price': sell_order_price,
-                    'volume': volume,
-                    'profit': profit,
-                    'origin': sell['system_id'],
-                    'origin_station': sell['station_id'],
-                    'origin_name': sell['station_name'],
-                    'origin_security': sell.get('security', 0),
-                    'dest': buy['system_id'],
-                    'dest_station': buy['station_id'],
-                    'dest_name': buy['station_name'] + ' (Sell Order)',
-                    'dest_security': buy.get('security', 0)
-                })
-        return trades
+                key = (sell_station, buy_station)
+                if key not in trades or net_profit > trades[key]['profit']:
+                    trades[key] = {
+                        'buy_price': best_sell_price,
+                        'sell_price': sell_order_price,
+                        'volume': int(volume),
+                        'profit': int(net_profit),
+                        'origin': sell_data['system_id'],
+                        'origin_station': sell_station,
+                        'origin_name': sell_data['station_name'],
+                        'origin_security': sell_data['security'],
+                        'dest': buy_data['system_id'],
+                        'dest_station': buy_station,
+                        'dest_name': buy_data['station_name'] + ' [SELL ORDER]',
+                        'dest_security': buy_data['security']
+                    }
+        
+        return list(trades.values())
     
     def _find_patient_trades(self, sell_orders, buy_orders, min_profit, item_volume):
-        """Find patient trades: place buy orders AND place sell orders"""
-        trades = []
+        """Find patient trades: place buy orders AND place sell orders
+        
+        Strategy: Maximum patience - undercut sells with buy order, overcut buys with sell order
+        Highest potential profit but longest wait time
+        """
         if not sell_orders or not buy_orders:
-            return trades
+            return []
         
-        # Get reference prices
-        station_min_sell = {}
-        for sell in sell_orders:
-            key = sell['station_id']
-            if key not in station_min_sell or sell['price'] < station_min_sell[key]['price']:
-                station_min_sell[key] = sell
+        broker_fee = 0.03
+        sales_tax = 0.036
         
-        station_max_buy = {}
-        for buy in buy_orders:
-            key = buy['station_id']
-            if key not in station_max_buy or buy['price'] > station_max_buy[key]['price']:
-                station_max_buy[key] = buy
+        # Group sells by station
+        sells_by_station = {}
+        for order in sell_orders:
+            sid = order['station_id']
+            if sid not in sells_by_station:
+                sells_by_station[sid] = {
+                    'orders': [],
+                    'system_id': order['system_id'],
+                    'station_name': order['station_name'],
+                    'security': order.get('security', 0)
+                }
+            sells_by_station[sid]['orders'].append(order)
         
-        for sell_station, sell in station_min_sell.items():
-            for buy_station, buy in station_max_buy.items():
-                # Buy at 95% of sell price, sell at 105% of buy price
-                buy_order_price = sell['price'] * 0.95
-                sell_order_price = buy['price'] * 1.05
+        # Group buys by station
+        buys_by_station = {}
+        for order in buy_orders:
+            sid = order['station_id']
+            if sid not in buys_by_station:
+                buys_by_station[sid] = {
+                    'orders': [],
+                    'system_id': order['system_id'],
+                    'station_name': order['station_name'],
+                    'security': order.get('security', 0)
+                }
+            buys_by_station[sid]['orders'].append(order)
+        
+        trades = {}
+        
+        for sell_station, sell_data in sells_by_station.items():
+            min_sell_price = min(o['price'] for o in sell_data['orders'])
+            total_sell_vol = sum(o['volume'] for o in sell_data['orders'])
+            
+            # Place buy order at 95% of lowest sell
+            buy_order_price = min_sell_price * 0.95
+            
+            for buy_station, buy_data in buys_by_station.items():
+                max_buy_price = max(o['price'] for o in buy_data['orders'])
+                total_buy_vol = sum(o['volume'] for o in buy_data['orders'])
+                
+                # Place sell order at 105% of highest buy
+                sell_order_price = max_buy_price * 1.05
                 
                 if buy_order_price >= sell_order_price:
                     continue
                 
-                volume = min(sell['volume'], buy['volume'])
-                profit = int((sell_order_price - buy_order_price) * volume)
+                volume = min(total_sell_vol, total_buy_vol)
                 
-                if profit < min_profit:
+                # Calculate with fees (both buy and sell are orders)
+                gross = (sell_order_price - buy_order_price) * volume
+                fees = (buy_order_price * volume * broker_fee) + \
+                       (sell_order_price * volume * (broker_fee + sales_tax))
+                net_profit = gross - fees
+                
+                if net_profit < min_profit:
                     continue
                 
-                trades.append({
-                    'buy_price': buy_order_price,
-                    'sell_price': sell_order_price,
-                    'volume': volume,
-                    'profit': profit,
-                    'origin': sell['system_id'],
-                    'origin_station': sell['station_id'],
-                    'origin_name': sell['station_name'] + ' (Buy Order)',
-                    'origin_security': sell.get('security', 0),
-                    'dest': buy['system_id'],
-                    'dest_station': buy['station_id'],
-                    'dest_name': buy['station_name'] + ' (Sell Order)',
-                    'dest_security': buy.get('security', 0)
-                })
-        return trades
+                key = (sell_station, buy_station)
+                if key not in trades or net_profit > trades[key]['profit']:
+                    trades[key] = {
+                        'buy_price': buy_order_price,
+                        'sell_price': sell_order_price,
+                        'volume': int(volume),
+                        'profit': int(net_profit),
+                        'origin': sell_data['system_id'],
+                        'origin_station': sell_station,
+                        'origin_name': sell_data['station_name'] + ' [BUY ORDER]',
+                        'origin_security': sell_data['security'],
+                        'dest': buy_data['system_id'],
+                        'dest_station': buy_station,
+                        'dest_name': buy_data['station_name'] + ' [SELL ORDER]',
+                        'dest_security': buy_data['security']
+                    }
+        
+        return list(trades.values())
 
 # Global scanner instance
 scanner = MarketScanner()
@@ -480,5 +709,6 @@ def get_scanner_status():
         'progress': scanner.progress,
         'current_item': scanner.current_item,
         'scanned': scanner.scanned_items,
-        'total': scanner.total_items
+        'total': scanner.total_items,
+        'last_updated': scanner.last_updated  # Unix timestamp when scan completed
     }

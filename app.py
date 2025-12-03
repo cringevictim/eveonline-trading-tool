@@ -344,6 +344,86 @@ def stop_scan():
     return jsonify({'status': 'stopped'})
 
 
+@app.route('/api/calculate_distances', methods=['POST'])
+def calculate_distances():
+    """Calculate jump distances from a source system to multiple destination systems."""
+    data = request.json
+    from_system = data.get('from_system')
+    to_systems = data.get('to_systems', [])
+    route_flag = data.get('route_flag', 'secure')
+    
+    if not from_system or not to_systems:
+        return jsonify({})
+    
+    # Use the pathfinder to get routes
+    from pathfinder import get_jumps_sync
+    
+    distances = {}
+    for to_system in to_systems:
+        if from_system == to_system:
+            distances[to_system] = 0
+        else:
+            try:
+                jumps = get_jumps_sync(from_system, to_system, route_flag)
+                distances[to_system] = jumps if jumps is not None else 999
+            except:
+                distances[to_system] = 999
+    
+    return jsonify(distances)
+
+
+@app.route('/api/check_route_security', methods=['POST'])
+def check_route_security():
+    """Check if a route passes through lowsec/nullsec systems."""
+    data = request.json
+    from_system = data.get('from_system')
+    to_system = data.get('to_system')
+    route_flag = data.get('route_flag', 'secure')
+    
+    if not from_system or not to_system:
+        return jsonify({'error': 'Missing system IDs'}), 400
+    
+    import requests
+    
+    # Get the actual route from ESI
+    flag_map = {'secure': 'secure', 'shortest': 'shortest', 'insecure': 'insecure'}
+    esi_flag = flag_map.get(route_flag, 'secure')
+    
+    try:
+        url = f"https://esi.evetech.net/latest/route/{from_system}/{to_system}/"
+        params = {'flag': esi_flag}
+        response = requests.get(url, params=params, timeout=10)
+        
+        if response.status_code != 200:
+            return jsonify({'error': 'Failed to get route', 'safe': True})
+        
+        route_systems = response.json()
+        
+        # Check security status of each system
+        dangerous_systems = []
+        for system_id in route_systems:
+            sys_url = f"https://esi.evetech.net/latest/universe/systems/{system_id}/"
+            sys_response = requests.get(sys_url, timeout=5)
+            if sys_response.status_code == 200:
+                sys_data = sys_response.json()
+                security = sys_data.get('security_status', 1.0)
+                if security < 0.5:
+                    dangerous_systems.append({
+                        'id': system_id,
+                        'name': sys_data.get('name', 'Unknown'),
+                        'security': round(security, 1)
+                    })
+        
+        return jsonify({
+            'safe': len(dangerous_systems) == 0,
+            'dangerous_systems': dangerous_systems,
+            'total_jumps': len(route_systems) - 1
+        })
+    except Exception as e:
+        print(f"Route security check error: {e}")
+        return jsonify({'error': str(e), 'safe': True})
+
+
 if __name__ == '__main__':
     print("Initializing database...")
     init_db()

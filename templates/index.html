@@ -25,6 +25,10 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        html {
+            font-size: 125%; /* Scale everything by 1.25x */
+        }
+
         body {
             font-family: 'Rajdhani', sans-serif;
             background: var(--bg-dark);
@@ -35,7 +39,7 @@
                 radial-gradient(ellipse at bottom right, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
         }
 
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 1600px; margin: 0 auto; padding: 25px; }
 
         header {
             text-align: center;
@@ -91,6 +95,23 @@
             color: var(--accent);
             text-transform: uppercase;
             letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--profit);
+            border-radius: 50%;
+            animation: pulse-live 2s infinite;
+            box-shadow: 0 0 8px var(--profit);
+        }
+        
+        @keyframes pulse-live {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
         }
 
         .panel-toggle {
@@ -245,6 +266,212 @@
 
         .info-text { font-size: 0.7rem; color: var(--text-muted); margin-top: 8px; }
 
+        /* Character Panel in Main Content */
+        .char-panel { padding: 15px 20px; }
+        
+        .char-content {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .char-top-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .char-portrait {
+            width: 64px;
+            height: 64px;
+            border-radius: 8px;
+            border: 2px solid var(--accent);
+            flex-shrink: 0;
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+        
+        .char-name-block {
+            flex: 1;
+        }
+        
+        .char-pilot-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            color: var(--text);
+            font-weight: 700;
+        }
+        
+        .char-ship-name {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        
+        .char-bar {
+            padding: 10px 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            border-left: 3px solid var(--accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .char-bar.wallet-bar {
+            border-left-color: var(--profit);
+        }
+        
+        .char-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        
+        .char-value {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+        
+        .char-value.wallet {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--profit);
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        
+        .char-fees-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .char-fee {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            border-left: 3px solid var(--warning);
+        }
+        
+        .fee-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        
+        .fee-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            color: var(--warning);
+        }
+        
+        .logout-link {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 4px 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .logout-link:hover { 
+            color: var(--danger); 
+            border-color: var(--danger);
+        }
+        
+        .login-inline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        
+        .login-btn-inline {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--accent), #0ea5e9);
+            color: var(--bg-dark);
+            text-decoration: none;
+            border-radius: 6px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+        
+        .login-btn-inline:hover {
+            box-shadow: 0 4px 15px var(--accent-glow);
+            transform: translateY(-1px);
+        }
+        
+        .sync-btns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            grid-column: span 2;
+        }
+        
+        .sync-btn-inline:hover {
+            border-color: var(--accent);
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--accent);
+        }
+        
+        /* Settings Form in Right Panel */
+        .settings-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .setting-row {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .setting-row label {
+            font-size: 0.65rem;
+        }
+        
+        .setting-row-half {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .setting-half {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .setting-half label {
+            font-size: 0.65rem;
+        }
+        
+        .sync-btn-sm {
+            padding: 8px;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .sync-btn-sm:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
         .sync-row {
             display: flex;
             gap: 8px;
@@ -253,13 +480,13 @@
 
         .sync-btn-inline {
             flex: 1;
-            padding: 6px 10px;
+            padding: 10px 12px;
             background: transparent;
             border: 1px solid var(--border);
             border-radius: 5px;
             color: var(--text-muted);
             font-family: 'Rajdhani', sans-serif;
-            font-size: 0.75rem;
+            font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
@@ -382,6 +609,11 @@
         .stat { text-align: center; }
         .stat-value { font-family: 'Orbitron', sans-serif; font-size: 1rem; color: var(--accent); }
         .stat-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; }
+
+        .data-age .stat-value { transition: color 0.3s; }
+        .data-age.fresh .stat-value { color: var(--profit); }
+        .data-age.stale .stat-value { color: var(--warning); }
+        .data-age.old .stat-value { color: var(--danger); }
 
 
         /* Table */
@@ -866,6 +1098,10 @@
         .deal-stat-value {
             font-family: 'Orbitron', sans-serif;
             font-size: 0.85rem;
+            color: var(--accent);
+        }
+
+        .deal-stat-value.profit {
             color: var(--profit);
         }
 
@@ -873,6 +1109,31 @@
             font-size: 0.6rem;
             color: var(--text-muted);
             text-transform: uppercase;
+        }
+
+        .route-warning {
+            border-radius: 6px;
+            padding: 8px 10px;
+            margin-top: 10px;
+            font-size: 0.75rem;
+        }
+
+        .route-warning.danger {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .route-warning.safe {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid var(--profit);
+            color: var(--profit);
+        }
+
+        .route-warning .warning-icon,
+        .route-warning .safe-icon {
+            font-weight: bold;
+            margin-right: 5px;
         }
 
         .deal-progress {
@@ -963,6 +1224,20 @@
 
         .action-btn-lg.full { grid-column: span 2; }
 
+        .action-btn-lg.highlight {
+            background: linear-gradient(135deg, var(--profit), #22c55e);
+            color: var(--bg-dark);
+            border: none;
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+        }
+
+        .action-btn-lg.highlight:hover:not(:disabled) {
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+            transform: translateY(-1px);
+        }
+
         .action-btn-lg.danger { border-color: var(--danger); color: var(--danger); }
         .action-btn-lg.danger:hover:not(:disabled) { background: rgba(239, 68, 68, 0.2); }
 
@@ -1004,11 +1279,7 @@
             color: var(--warning);
         }
 
-        .fee-label {
-            font-size: 0.6rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-        }
+
 
         @media (max-width: 1200px) {
             .main-layout {
@@ -1043,13 +1314,67 @@
         <div class="main-content">
 
         <div class="controls-wrapper">
-            <!-- Row 1: Market Settings + Ship Parameters -->
+            <!-- Row 1: Character Status + Market Settings side by side -->
             <div class="controls-row-main">
+                <!-- Character Status Panel (Left Half) -->
+                {% if character %}
+                <div class="control-panel char-panel">
+                    <div class="panel-header">
+                        <span class="panel-title">
+                            <span class="live-dot"></span>
+                            Character Status
+                        </span>
+                        <a href="/logout" class="logout-link" title="Logout">Logout</a>
+                    </div>
+                    <div class="char-content">
+                        <!-- Row 1: Portrait + Name/Ship -->
+                        <div class="char-top-row">
+                            <img class="char-portrait" src="{{ character.portrait }}" alt="Portrait" id="charPortrait">
+                            <div class="char-name-block">
+                                <div class="char-pilot-name" id="charName">{{ character.name }}</div>
+                                <div class="char-ship-name" id="charShip">Loading ship...</div>
+                            </div>
+                        </div>
+                        <!-- Row 2: Location (full width) -->
+                        <div class="char-bar">
+                            <span class="char-value" id="charLocation">Loading...</span>
+                        </div>
+                        <!-- Row 3: Wallet (full width) -->
+                        <div class="char-bar wallet-bar">
+                            <span class="char-label">Wallet</span>
+                            <span class="char-value wallet" id="charWallet">-</span>
+                        </div>
+                        <!-- Row 4: Fees side by side -->
+                        <div class="char-fees-row">
+                            <div class="char-fee">
+                                <span class="fee-label">Broker Fee</span>
+                                <span class="fee-value" id="brokerFee">3.0%</span>
+                            </div>
+                            <div class="char-fee">
+                                <span class="fee-label">Sales Tax</span>
+                                <span class="fee-value" id="salesTax">8.0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="control-panel">
+                    <div class="panel-header">
+                        <span class="panel-title">Character</span>
+                    </div>
+                    <div class="login-inline">
+                        <span>Login to sync wallet, set destinations & more</span>
+                        <a href="/login" class="login-btn-inline">&gt; Login with EVE</a>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Market Settings Panel (Right Half) -->
                 <div class="control-panel">
                     <div class="panel-header">
                         <span class="panel-title">Market Settings</span>
                     </div>
-                    <div class="form-grid-5">
+                    <div class="form-grid">
                         <div class="form-group">
                             <label>Market Group</label>
                             <select id="groupSelect">
@@ -1059,16 +1384,20 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Min Profit</label>
-                            <input type="text" id="minProfit" value="10 000 000" placeholder="10M">
+                            <label>Min Profit (M)</label>
+                            <input type="number" id="minProfit" value="10" placeholder="10" step="1" min="1">
                         </div>
                         <div class="form-group">
-                            <label>Max Cargo</label>
-                            <input type="text" id="cargoCapacity" value="5 000" placeholder="5K">
+                            <label>Max Budget (M)</label>
+                            <input type="number" id="maxBudget" value="500" placeholder="500" step="10" min="1">
                         </div>
                         <div class="form-group">
-                            <label>Max Budget</label>
-                            <input type="text" id="maxBudget" value="500 000 000" placeholder="500M">
+                            <label>Max Cargo (M3)</label>
+                            <input type="text" id="cargoCapacity" value="5 000" placeholder="5 000">
+                        </div>
+                        <div class="form-group">
+                            <label>Max Qty</label>
+                            <input type="number" id="maxQty" value="" placeholder="-" step="1" min="1">
                         </div>
                         <div class="form-group">
                             <label>Max Trips</label>
@@ -1078,47 +1407,9 @@
                             <label>Max Jumps</label>
                             <input type="number" id="maxJumps" value="" placeholder="-" step="1" min="1">
                         </div>
-                        <div class="form-group">
-                            <label>Min ISK/h</label>
-                            <input type="text" id="minIskPerHour" value="" placeholder="-">
-                        </div>
-                        <div class="form-group">
-                            <label>Max Time (m)</label>
-                            <input type="number" id="maxTime" value="" placeholder="-" step="5" min="1">
-                        </div>
-                    </div>
-                    <div class="sync-row">
-                        <button class="sync-btn-inline" id="btnSyncWallet" onclick="syncWallet()" title="Sync wallet balance">Sync Wallet</button>
-                        <button class="sync-btn-inline" id="btnSyncCargo" onclick="syncCargo()" title="Sync cargo from current ship">Sync Cargo</button>
-                    </div>
-                </div>
-
-                <div class="control-panel">
-                    <div class="panel-header">
-                        <span class="panel-title">Ship Parameters</span>
-                        <label class="panel-toggle">
-                            <input type="checkbox" id="enableShipParams" checked>
-                            <span>Enable Time Calc</span>
-                        </label>
-                    </div>
-                    <div class="panel-content" id="shipParamsContent">
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>Align Empty (s)</label>
-                                <input type="number" id="alignEmpty" value="22" step="0.5" min="1">
-                            </div>
-                            <div class="form-group">
-                                <label>Align Full (s)</label>
-                                <input type="number" id="alignFull" value="44" step="0.5" min="1">
-                            </div>
-                            <div class="form-group">
-                                <label>Warp Empty (AU/s)</label>
-                                <input type="number" id="warpEmpty" value="1.5" step="0.1" min="0.5">
-                            </div>
-                            <div class="form-group">
-                                <label>Warp Full (AU/s)</label>
-                                <input type="number" id="warpFull" value="1.5" step="0.1" min="0.5">
-                            </div>
+                        <div class="form-group sync-btns">
+                            <button class="sync-btn-inline" id="btnSyncWallet" onclick="syncWallet()">Sync Wallet</button>
+                            <button class="sync-btn-inline" id="btnSyncCargo" onclick="syncCargo()">Sync Cargo</button>
                         </div>
                     </div>
                 </div>
@@ -1198,6 +1489,10 @@
                     <div class="stat-value" id="routesCount">0</div>
                     <div class="stat-label">Routes</div>
                 </div>
+                <div class="stat data-age" id="dataAgeBlock">
+                    <div class="stat-value" id="dataAge">-</div>
+                    <div class="stat-label">Data Age</div>
+                </div>
             </div>
         </div>
 
@@ -1207,13 +1502,12 @@
                 <tr>
                     <th class="sortable" data-sort="type_name" title="Item name">Item</th>
                     <th class="sortable active desc" data-sort="profit" title="Total profit from this trade">Profit <span class="sort-arrow">v</span></th>
-                    <th class="sortable" data-sort="time_seconds" id="timeHeader" title="Estimated travel time">Time <span class="sort-arrow">v</span></th>
-                    <th class="sortable" data-sort="profit_per_hour" id="iskHourHeader" title="Profit per hour of travel">ISK/h <span class="sort-arrow">v</span></th>
+                    <th class="sortable" data-sort="cost" title="Total ISK needed to buy goods">Budget <span class="sort-arrow">v</span></th>
                     <th class="sortable" data-sort="profit_per_jump" title="Profit per jump (efficiency)">ISK/j <span class="sort-arrow">v</span></th>
                     <th class="sortable" data-sort="jumps" title="Number of jumps one way">Jumps <span class="sort-arrow">v</span></th>
                     <th class="sortable" data-sort="trips" title="Round trips needed to move all goods">Trips <span class="sort-arrow">v</span></th>
-                    <th class="sortable" data-sort="cost" title="Adjusted / Original quantity">Qty <span class="sort-arrow">v</span></th>
-                    <th title="Buy station -> Sell station">Route</th>
+                    <th class="sortable" data-sort="amount" title="Quantity of items">Qty <span class="sort-arrow">v</span></th>
+                    <th class="sortable" data-sort="distance" title="Click to sort by closest buy station">Route <span class="sort-arrow">v</span></th>
                 </tr>
             </thead>
             <tbody id="tradesBody">
@@ -1231,43 +1525,6 @@
 
         <!-- Status Panel (Right Side) -->
         <div class="status-panel">
-            {% if character %}
-            <!-- Character Status Card -->
-            <div class="status-card char-status-card">
-                <a href="/logout" class="logout-corner" title="Logout">x</a>
-                <div class="status-card-title">
-                    <span class="live-dot"></span>
-                    Character Status
-                </div>
-                <div class="char-header">
-                    <img class="char-portrait-lg" src="{{ character.portrait }}" alt="Portrait" id="charPortrait">
-                    <div class="char-details">
-                        <div class="char-name-lg" id="charName">{{ character.name }}</div>
-                        <div class="char-ship" id="charShip">Loading ship...</div>
-                    </div>
-                </div>
-                <div class="status-grid">
-                    <div class="status-item full">
-                        <div class="status-label">Location</div>
-                        <div class="location-value" id="charLocation">Loading...</div>
-                    </div>
-                    <div class="status-item full">
-                        <div class="status-label">Wallet</div>
-                        <div class="status-value profit" id="charWallet">-</div>
-                    </div>
-                </div>
-                <div class="fees-grid">
-                    <div class="fee-item">
-                        <div class="fee-value" id="brokerFee">3.0%</div>
-                        <div class="fee-label">Broker Fee</div>
-                    </div>
-                    <div class="fee-item">
-                        <div class="fee-value" id="salesTax">8.0%</div>
-                        <div class="fee-label">Sales Tax</div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Selected Deal Card -->
             <div class="status-card selected-deal" id="selectedDealCard">
                 <button class="clear-corner" id="btnClearDeal" onclick="clearDeal()" title="Clear selection">x</button>
@@ -1278,19 +1535,20 @@
                         <div>Click a trade to select it</div>
                     </div>
                 </div>
+                <div class="route-warning" id="routeWarning" style="display: none;"></div>
             </div>
 
-            <!-- Actions Card -->
-            <div class="status-card">
+            <!-- Actions Card (only visible when deal selected) -->
+            <div class="status-card" id="quickActionsCard" style="display: none;">
                 <div class="status-card-title">Quick Actions</div>
                 <div class="action-buttons">
-                    <button class="action-btn-lg" id="btnSetBuyDest" onclick="setDestination('buy')" disabled>
+                    <button class="action-btn-lg" id="btnSetBuyDest" onclick="setDestination('buy')">
                         Go to Buy
                     </button>
-                    <button class="action-btn-lg" id="btnSetSellDest" onclick="setDestination('sell')" disabled>
+                    <button class="action-btn-lg" id="btnSetSellDest" onclick="setDestination('sell')">
                         Go to Sell
                     </button>
-                    <button class="action-btn-lg full" id="btnOpenMarket" onclick="openMarketForDeal()" disabled>
+                    <button class="action-btn-lg full" id="btnOpenMarket" onclick="openMarketForDeal()">
                         Open Market Details
                     </button>
                 </div>
@@ -1320,41 +1578,23 @@
                 </div>
             </div>
 
-            {% else %}
-            <!-- Login Prompt -->
-            <div class="status-card">
-                <div class="login-prompt">
-                    <div class="login-prompt-icon">[&gt;]</div>
-                    <div class="login-prompt-text">
-                        Login with your EVE account to unlock character features:
-                        <br><br>
-                        - Auto-sync wallet balance<br>
-                        - Set in-game destinations<br>
-                        - Track deal progress<br>
-                        - Calculate accurate fees
-                    </div>
-                    <a href="/login" class="action-btn-lg full primary" style="text-decoration: none;">
-                        &gt; Login with EVE
-                    </a>
-                </div>
-            </div>
-            {% endif %}
         </div><!-- End status-panel -->
         </div><!-- End main-layout -->
     </div><!-- End container -->
 
     <script>
-        let currentSort = 'profit_per_hour';
+        let currentSort = 'profit_per_jump';
         let sortDirection = 'desc'; // 'asc' or 'desc'
         let isScanning = false;
         let pollInterval;
-        let shipParamsEnabled = true;
         let isLoggedIn = {{ 'true' if character else 'false' }};
         let characterData = null;
         let selectedDeal = null;
         let activeDeal = null;
         let allTradesCache = [];
         let characterStatusInterval = null;
+        let lastUpdatedTimestamp = null;
+        let dataAgeInterval = null;
 
         // ========== Number Formatting ==========
         
@@ -1402,33 +1642,26 @@
             return val > 0 ? val : defaultVal;
         }
 
-        function getCargoCapacity() { return getInputValue('cargoCapacity', 830000); }
-        function getBudget() { return getInputValue('maxBudget', Infinity); }
-        function getMinProfit() { return getInputValue('minProfit', 10000000); }
-        function getMaxTime() {
-            const val = parseFloat(document.getElementById('maxTime').value);
-            return val > 0 ? val * 60 : Infinity; // Convert minutes to seconds
+        function getCargoCapacity() { return getInputValue('cargoCapacity', 5000); }
+        function getBudget() { 
+            const val = parseFloat(document.getElementById('maxBudget')?.value) || 0;
+            return val > 0 ? val * 1000000 : Infinity; // Convert millions to actual ISK
+        }
+        function getMinProfit() { 
+            const val = parseFloat(document.getElementById('minProfit')?.value) || 10;
+            return val * 1000000; // Convert millions to actual ISK
         }
         function getMaxTrips() {
-            const val = parseInt(document.getElementById('maxTrips').value);
+            const val = parseInt(document.getElementById('maxTrips')?.value);
             return val > 0 ? val : Infinity;
         }
         function getMaxJumps() {
-            const val = parseInt(document.getElementById('maxJumps').value);
+            const val = parseInt(document.getElementById('maxJumps')?.value);
             return val > 0 ? val : Infinity;
         }
-        function getMinIskPerHour() {
-            return getInputValue('minIskPerHour', 0);
-        }
-
-        function getShipStats() {
-            return {
-                alignEmpty: parseFloat(document.getElementById('alignEmpty').value) || 22,
-                alignFull: parseFloat(document.getElementById('alignFull').value) || 44,
-                warpEmpty: parseFloat(document.getElementById('warpEmpty').value) || 1.5,
-                warpFull: parseFloat(document.getElementById('warpFull').value) || 1.5,
-                gateActivation: 10
-            };
+        function getMaxQty() {
+            const val = parseSpacedNumber(document.getElementById('maxQty')?.value);
+            return val > 0 ? val : Infinity;
         }
 
         function getSelectedRegions() {
@@ -1439,101 +1672,13 @@
             return regions.length > 0 ? regions : ['highsec'];
         }
 
-        // ========== UI Toggles ==========
-
-        function toggleShipParams() {
-            shipParamsEnabled = document.getElementById('enableShipParams').checked;
-            const content = document.getElementById('shipParamsContent');
-            content.classList.toggle('disabled', !shipParamsEnabled);
-            
-            // Update table headers and sort buttons
-            const timeHeader = document.getElementById('timeHeader');
-            const iskHourHeader = document.getElementById('iskHourHeader');
-            const sortProfitHour = document.getElementById('sortProfitHour');
-            const sortTime = document.getElementById('sortTime');
-            
-            if (shipParamsEnabled) {
-                timeHeader.style.display = '';
-                iskHourHeader.style.display = '';
-                sortProfitHour.style.display = '';
-                sortTime.style.display = '';
-            } else {
-                timeHeader.style.display = 'none';
-                iskHourHeader.style.display = 'none';
-                sortProfitHour.style.display = 'none';
-                sortTime.style.display = 'none';
-                // Switch sort if currently on time-related sorts
-                if (currentSort === 'profit_per_hour' || currentSort === 'time_seconds') {
-                    currentSort = 'profit_per_jump';
-                    sortDirection = 'desc';
-                    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
-                    const newActiveBtn = document.querySelector('[data-sort="profit_per_jump"]');
-                    newActiveBtn.classList.add('active');
-                }
-            }
-            loadTrades();
-        }
-
-        // ========== Time Calculations ==========
-
-        const AVG_SYSTEM_SIZE_AU = 12;
-
-        function calculateWarpTime(distanceAU, warpSpeed, alignTime) {
-            if (distanceAU <= 0) return 0;
-            const minWarp = alignTime * 2 + 3;
-            if (distanceAU < 0.5) return minWarp;
-            const effectiveDistance = Math.max(0, distanceAU - 1.0);
-            const cruiseTime = effectiveDistance / warpSpeed;
-            return alignTime + cruiseTime + alignTime + 3;
-        }
-
-        function calculateTripTime(jumps, shipStats, isLoaded) {
-            const alignTime = isLoaded ? shipStats.alignFull : shipStats.alignEmpty;
-            const warpSpeed = isLoaded ? shipStats.warpFull : shipStats.warpEmpty;
-            let totalTime = 0;
-            for (let i = 0; i < jumps; i++) {
-                totalTime += shipStats.gateActivation;
-                totalTime += calculateWarpTime(AVG_SYSTEM_SIZE_AU, warpSpeed, alignTime);
-            }
-            totalTime += 20; // Undock/dock
-            return totalTime;
-        }
-
-        function calculateRoundTripTime(jumps, trips, shipStats) {
-            const outbound = calculateTripTime(jumps, shipStats, false);
-            const returnTrip = calculateTripTime(jumps, shipStats, true);
-            return (outbound + returnTrip) * trips;
-        }
-
-        function formatTime(seconds) {
-            if (!seconds || !shipParamsEnabled) return '-';
-            if (seconds < 60) return `${Math.round(seconds)}s`;
-            if (seconds < 3600) {
-                const mins = Math.floor(seconds / 60);
-                const secs = Math.round(seconds % 60);
-                return `${mins}m ${secs}s`;
-            }
-            const hours = Math.floor(seconds / 3600);
-            const mins = Math.floor((seconds % 3600) / 60);
-            return `${hours}h ${mins}m`;
-        }
-
         // ========== Trade Processing ==========
 
-        function adjustTradeForBudget(trade, budget, cargoCapacity, shipStats) {
+        function adjustTradeForBudget(trade, budget, cargoCapacity) {
             // Safety checks for invalid trade data
-            if (!trade || !trade.amount || trade.amount <= 0) {
-                console.log('Skipped trade (invalid amount):', trade?.type_name);
-                return [];
-            }
-            if (!trade.buy_price || trade.buy_price <= 0) {
-                console.log('Skipped trade (invalid buy_price):', trade.type_name);
-                return [];
-            }
-            if (!trade.sell_price) {
-                console.log('Skipped trade (invalid sell_price):', trade.type_name);
-                return [];
-            }
+            if (!trade || !trade.amount || trade.amount <= 0) return [];
+            if (!trade.buy_price || trade.buy_price <= 0) return [];
+            if (!trade.sell_price) return [];
             
             const costPerUnit = trade.buy_price;
             const profitPerUnit = trade.sell_price - trade.buy_price;
@@ -1545,10 +1690,7 @@
                 : Math.floor(budget / costPerUnit);
             const adjustedAmount = Math.min(trade.amount, maxAffordable);
             
-            if (adjustedAmount <= 0) {
-                console.log('Skipped trade (cannot afford):', trade.type_name, 'Budget:', budget, 'CostPerUnit:', costPerUnit);
-                return [];
-            }
+            if (adjustedAmount <= 0) return [];
             
             const adjustedCost = adjustedAmount * costPerUnit;
             const adjustedProfit = adjustedAmount * profitPerUnit;
@@ -1556,14 +1698,6 @@
             const adjustedTrips = Math.ceil(adjustedVolume / cargoCapacity);
             const adjustedTotalJumps = trade.jumps * 2 * adjustedTrips;
             const adjustedProfitPerJump = adjustedTotalJumps > 0 ? adjustedProfit / adjustedTotalJumps : adjustedProfit;
-            const adjustedIskPerM3 = adjustedVolume > 0 ? adjustedProfit / adjustedVolume : 0;
-            
-            let adjustedTime = 0;
-            let adjustedProfitPerHour = 0;
-            if (shipParamsEnabled) {
-                adjustedTime = calculateRoundTripTime(trade.jumps, adjustedTrips, shipStats);
-                adjustedProfitPerHour = adjustedTime > 0 ? (adjustedProfit / adjustedTime) * 3600 : 0;
-            }
             
             const results = [];
             
@@ -1576,14 +1710,12 @@
                 trips: adjustedTrips,
                 total_jumps: adjustedTotalJumps,
                 profit_per_jump: adjustedProfitPerJump,
-                isk_per_m3: adjustedIskPerM3,
-                time_seconds: adjustedTime,
-                profit_per_hour: adjustedProfitPerHour,
                 original_amount: trade.amount,
                 variant: 'full',
                 has_single_trip_option: adjustedTrips > 1
             });
             
+            // Single trip variant if multiple trips needed
             if (adjustedTrips > 1) {
                 const maxUnitsPerTrip = Math.floor(cargoCapacity / volumePerUnit);
                 const singleTripAmount = Math.min(maxUnitsPerTrip, adjustedAmount);
@@ -1598,18 +1730,8 @@
                     const singleTripVolume = finalSingleTripAmount * volumePerUnit;
                     const singleTripTotalJumps = trade.jumps * 2;
                     const singleTripProfitPerJump = singleTripTotalJumps > 0 ? singleTripProfit / singleTripTotalJumps : singleTripProfit;
-                    const singleTripIskPerM3 = singleTripVolume > 0 ? singleTripProfit / singleTripVolume : 0;
                     
-                    let singleTripTime = 0;
-                    let singleTripProfitPerHour = 0;
-                    if (shipParamsEnabled) {
-                        singleTripTime = calculateRoundTripTime(trade.jumps, 1, shipStats);
-                        singleTripProfitPerHour = singleTripTime > 0 ? (singleTripProfit / singleTripTime) * 3600 : 0;
-                    }
-                    
-                    const efficiencyBoost = adjustedProfitPerHour > 0 ? 
-                        ((singleTripProfitPerHour / adjustedProfitPerHour) - 1) * 100 : 
-                        ((singleTripProfitPerJump / adjustedProfitPerJump) - 1) * 100;
+                    const efficiencyBoost = ((singleTripProfitPerJump / adjustedProfitPerJump) - 1) * 100;
                     
                     results.push({
                         ...trade,
@@ -1620,9 +1742,6 @@
                         trips: 1,
                         total_jumps: singleTripTotalJumps,
                         profit_per_jump: singleTripProfitPerJump,
-                        isk_per_m3: singleTripIskPerM3,
-                        time_seconds: singleTripTime,
-                        profit_per_hour: singleTripProfitPerHour,
                         original_amount: trade.amount,
                         variant: 'single_trip',
                         efficiency_boost: efficiencyBoost,
@@ -1754,6 +1873,17 @@
                 document.getElementById('tradesCount').textContent = formatNumber(data.trades);
                 document.getElementById('routesCount').textContent = formatNumber(data.cached_routes);
 
+                // Track when data was last updated
+                if (data.last_updated) {
+                    lastUpdatedTimestamp = data.last_updated;
+                    updateDataAge();
+                    
+                    // Start data age ticker if not running
+                    if (!dataAgeInterval) {
+                        dataAgeInterval = setInterval(updateDataAge, 1000);
+                    }
+                }
+
                 if (data.status === 'complete' || data.status === 'error' || data.status === 'stopped') {
                     clearInterval(pollInterval);
                     isScanning = false;
@@ -1769,6 +1899,44 @@
             }
         }
 
+        function updateDataAge() {
+            if (!lastUpdatedTimestamp) {
+                document.getElementById('dataAge').textContent = '-';
+                return;
+            }
+            
+            const now = Date.now() / 1000;
+            const ageSeconds = Math.floor(now - lastUpdatedTimestamp);
+            const block = document.getElementById('dataAgeBlock');
+            const ageEl = document.getElementById('dataAge');
+            
+            // Format the age
+            let ageText;
+            if (ageSeconds < 60) {
+                ageText = `${ageSeconds}s`;
+            } else if (ageSeconds < 3600) {
+                const mins = Math.floor(ageSeconds / 60);
+                const secs = ageSeconds % 60;
+                ageText = `${mins}m${secs}s`;
+            } else {
+                const hours = Math.floor(ageSeconds / 3600);
+                const mins = Math.floor((ageSeconds % 3600) / 60);
+                ageText = `${hours}h${mins}m`;
+            }
+            
+            ageEl.textContent = ageText;
+            
+            // Color code: green < 2min, yellow 2-5min, red > 5min
+            block.classList.remove('fresh', 'stale', 'old');
+            if (ageSeconds < 120) {
+                block.classList.add('fresh');
+            } else if (ageSeconds < 300) {
+                block.classList.add('stale');
+            } else {
+                block.classList.add('old');
+            }
+        }
+
         // ========== Load Trades ==========
 
         async function loadTrades() {
@@ -1778,17 +1946,13 @@
                 
                 const budget = getBudget();
                 const cargoCapacity = getCargoCapacity();
-                const shipStats = getShipStats();
-                const maxTime = getMaxTime();
-                
-                console.log('Loading trades:', rawTrades.length, 'Budget:', budget, 'Cargo:', cargoCapacity);
+                const minProfit = getMinProfit();
                 
                 let allTrades = [];
                 rawTrades.forEach(trade => {
                     try {
-                        const variants = adjustTradeForBudget(trade, budget, cargoCapacity, shipStats);
+                        const variants = adjustTradeForBudget(trade, budget, cargoCapacity);
                         variants.forEach(v => {
-                            // More lenient check - include if profit is any positive number or 0
                             if (v && v.profit !== undefined && !isNaN(v.profit) && v.profit >= 0) {
                                 allTrades.push(v);
                             }
@@ -1798,46 +1962,45 @@
                     }
                 });
                 
-                console.log('Trades after budget adjustment:', allTrades.length);
-                
-                // Filter by max time (if ship params enabled and max time set)
-                if (shipParamsEnabled && maxTime < Infinity && maxTime > 0) {
-                    const beforeCount = allTrades.length;
-                    allTrades = allTrades.filter(t => !t.time_seconds || t.time_seconds <= maxTime);
-                    if (allTrades.length < beforeCount) console.log('Filtered by time:', beforeCount - allTrades.length);
+                // Filter by min profit
+                if (minProfit > 0) {
+                    allTrades = allTrades.filter(t => t.profit >= minProfit);
                 }
                 
                 // Filter by max trips
                 const maxTrips = getMaxTrips();
                 if (maxTrips < Infinity && maxTrips > 0) {
-                    const beforeCount = allTrades.length;
                     allTrades = allTrades.filter(t => !t.trips || t.trips <= maxTrips);
-                    if (allTrades.length < beforeCount) console.log('Filtered by trips:', beforeCount - allTrades.length);
                 }
                 
                 // Filter by max jumps
                 const maxJumps = getMaxJumps();
                 if (maxJumps < Infinity && maxJumps > 0) {
-                    const beforeCount = allTrades.length;
                     allTrades = allTrades.filter(t => !t.jumps || t.jumps <= maxJumps);
-                    if (allTrades.length < beforeCount) console.log('Filtered by jumps:', beforeCount - allTrades.length);
                 }
                 
-                // Filter by min ISK/h (if ship params enabled)
-                const minIskPerHour = getMinIskPerHour();
-                if (shipParamsEnabled && minIskPerHour > 0) {
-                    const beforeCount = allTrades.length;
-                    allTrades = allTrades.filter(t => !t.profit_per_hour || t.profit_per_hour >= minIskPerHour);
-                    if (allTrades.length < beforeCount) console.log('Filtered by ISK/h:', beforeCount - allTrades.length);
+                // Filter by max quantity
+                const maxQty = getMaxQty();
+                if (maxQty < Infinity && maxQty > 0) {
+                    allTrades = allTrades.filter(t => !t.amount || t.amount <= maxQty);
                 }
                 
-                console.log('Final trades count:', allTrades.length);
-                
-                // Sort with direction
+                // Multi-criteria sort: primary sort, then secondary by profit (desc) or jumps (asc)
                 allTrades.sort((a, b) => {
                     const valA = a[currentSort] || 0;
                     const valB = b[currentSort] || 0;
-                    return sortDirection === 'desc' ? valB - valA : valA - valB;
+                    const primaryCompare = sortDirection === 'desc' ? valB - valA : valA - valB;
+                    
+                    // If equal, use secondary sort
+                    if (primaryCompare === 0) {
+                        // If sorting by jumps/trips, secondary sort by profit desc
+                        if (currentSort === 'jumps' || currentSort === 'trips') {
+                            return (b.profit || 0) - (a.profit || 0);
+                        }
+                        // Otherwise secondary sort by jumps asc
+                        return (a.jumps || 0) - (b.jumps || 0);
+                    }
+                    return primaryCompare;
                 });
                 allTrades = allTrades.slice(0, 150);
 
@@ -1849,13 +2012,12 @@
 
         function renderTrades(trades) {
             const tbody = document.getElementById('tradesBody');
-            const showTime = shipParamsEnabled;
             allTradesCache = trades;
             
             if (trades.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="9">
+                        <td colspan="8">
                             <div class="empty-state">
                                 <h3>No trades found</h3>
                                 <p>Configure settings and start a scan</p>
@@ -1892,15 +2054,11 @@
                     ? `${formatAmountCompact(trade.amount)}/${formatAmountCompact(trade.original_amount)}`
                     : formatAmountCompact(trade.amount);
                 
-                const timeCell = showTime ? `<td class="time-cell" title="Estimated round-trip time">${formatTime(trade.time_seconds)}</td>` : '<td>-</td>';
-                const iskHourCell = showTime ? `<td class="isk-hour" title="Profit per hour: ${formatNumber(trade.profit_per_hour)} ISK">${formatNumber(trade.profit_per_hour)}</td>` : '<td>-</td>';
-                
                 return `
                 <tr class="${selectedClass}" onclick="selectDeal(${index})" style="cursor: pointer;">
                     <td class="item-name" title="${trade.type_name}">${itemLabel}</td>
                     <td class="profit" title="Total profit: ${formatWithSpaces(Math.floor(trade.profit))} ISK">${formatNumber(trade.profit)}</td>
-                    ${timeCell}
-                    ${iskHourCell}
+                    <td class="budget" title="Total cost: ${formatWithSpaces(Math.floor(trade.cost))} ISK">${formatNumber(trade.cost)}</td>
                     <td class="isk-jump" title="Profit per jump: ${formatNumber(trade.profit_per_jump)} ISK">${formatNumber(trade.profit_per_jump)}</td>
                     <td><span class="badge jumps-badge" title="Jumps one way">${trade.jumps}</span></td>
                     <td>${tripsBadge}</td>
@@ -1950,16 +2108,77 @@
             });
         }
 
+        // ========== Settings Persistence ==========
+
+        const SETTINGS_KEY = 'eve_trading_settings';
+
+        function saveSettings() {
+            const settings = {
+                // Market Settings
+                groupSelect: document.getElementById('groupSelect')?.value,
+                minProfit: document.getElementById('minProfit')?.value,
+                cargoCapacity: document.getElementById('cargoCapacity')?.value,
+                maxBudget: document.getElementById('maxBudget')?.value,
+                maxTrips: document.getElementById('maxTrips')?.value,
+                maxJumps: document.getElementById('maxJumps')?.value,
+                
+                // Route & Trade Options
+                routeFlag: document.getElementById('routeFlag')?.value,
+                tradeMode: document.getElementById('tradeMode')?.value,
+                regionHighsec: document.getElementById('regionHighsec')?.checked,
+                regionLowsec: document.getElementById('regionLowsec')?.checked,
+                regionNullsec: document.getElementById('regionNullsec')?.checked,
+                
+                // Sort preferences
+                currentSort: currentSort,
+                sortDirection: sortDirection
+            };
+            
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+        }
+
+        function loadSettings() {
+            try {
+                const saved = localStorage.getItem(SETTINGS_KEY);
+                if (!saved) return;
+                
+                const settings = JSON.parse(saved);
+                
+                // Market Settings
+                if (settings.groupSelect) document.getElementById('groupSelect').value = settings.groupSelect;
+                if (settings.minProfit) document.getElementById('minProfit').value = settings.minProfit;
+                if (settings.cargoCapacity) document.getElementById('cargoCapacity').value = settings.cargoCapacity;
+                if (settings.maxBudget) document.getElementById('maxBudget').value = settings.maxBudget;
+                if (settings.maxTrips) document.getElementById('maxTrips').value = settings.maxTrips;
+                if (settings.maxJumps) document.getElementById('maxJumps').value = settings.maxJumps;
+                
+                // Route & Trade Options
+                if (settings.routeFlag) document.getElementById('routeFlag').value = settings.routeFlag;
+                if (settings.tradeMode) document.getElementById('tradeMode').value = settings.tradeMode;
+                if (settings.regionHighsec !== undefined) document.getElementById('regionHighsec').checked = settings.regionHighsec;
+                if (settings.regionLowsec !== undefined) document.getElementById('regionLowsec').checked = settings.regionLowsec;
+                if (settings.regionNullsec !== undefined) document.getElementById('regionNullsec').checked = settings.regionNullsec;
+                
+                // Sort preferences
+                if (settings.currentSort) currentSort = settings.currentSort;
+                if (settings.sortDirection) sortDirection = settings.sortDirection;
+                
+                console.log('Settings loaded from localStorage');
+            } catch (e) {
+                console.error('Failed to load settings:', e);
+            }
+        }
+
         // ========== Initialization ==========
 
         document.addEventListener('DOMContentLoaded', function() {
+            // Load saved settings first
+            loadSettings();
+            
             // Setup formatted inputs
             setupFormattedInput('minProfit');
             setupFormattedInput('cargoCapacity');
             setupFormattedInput('maxBudget');
-
-            // Ship params toggle
-            document.getElementById('enableShipParams').addEventListener('change', toggleShipParams);
 
             // Sortable table headers
             document.querySelectorAll('.trades-table th.sortable').forEach(th => {
@@ -1967,32 +2186,53 @@
                     const sortKey = th.dataset.sort;
                     
                     if (currentSort === sortKey) {
-                        // Toggle direction
                         sortDirection = sortDirection === 'desc' ? 'asc' : 'desc';
                     } else {
-                        // New column - default to desc for values, asc for jumps/trips/time
                         document.querySelectorAll('.trades-table th.sortable').forEach(h => {
                             h.classList.remove('active', 'asc', 'desc');
                         });
                         currentSort = sortKey;
-                        // Default directions
-                        const ascDefaults = ['jumps', 'trips', 'time_seconds'];
+                        // Default directions - jumps/trips ascending, rest descending
+                        const ascDefaults = ['jumps', 'trips'];
                         sortDirection = ascDefaults.includes(sortKey) ? 'asc' : 'desc';
                     }
                     
-                    // Update classes
                     document.querySelectorAll('.trades-table th.sortable').forEach(h => {
                         h.classList.remove('active', 'asc', 'desc');
+                        // Reset arrow
+                        const arrow = h.querySelector('.sort-arrow');
+                        if (arrow) arrow.textContent = 'v';
                     });
                     th.classList.add('active', sortDirection);
                     
+                    // Update arrow direction
+                    const arrow = th.querySelector('.sort-arrow');
+                    if (arrow) {
+                        arrow.textContent = sortDirection === 'asc' ? '^' : 'v';
+                    }
+                    
                     loadTrades();
+                    saveSettings();
                 });
             });
 
-            // Reload on settings change
-            ['maxBudget', 'cargoCapacity', 'alignEmpty', 'alignFull', 'warpEmpty', 'warpFull', 'maxTime', 'maxTrips', 'maxJumps', 'minIskPerHour'].forEach(id => {
-                document.getElementById(id).addEventListener('change', loadTrades);
+            // Reload on settings change and save
+            ['maxBudget', 'cargoCapacity', 'maxTrips', 'maxJumps', 'minProfit', 'maxQty'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', function() {
+                    loadTrades();
+                    saveSettings();
+                });
+            });
+            
+            // Save settings on other control changes
+            ['groupSelect', 'routeFlag', 'tradeMode'].forEach(id => {
+                document.getElementById(id).addEventListener('change', saveSettings);
+            });
+            
+            // Save on region checkbox changes
+            ['regionHighsec', 'regionLowsec', 'regionNullsec'].forEach(id => {
+                document.getElementById(id).addEventListener('change', saveSettings);
             });
 
             // Initial load
@@ -2100,7 +2340,8 @@
             
             if (characterData && characterData.wallet) {
                 const budgetInput = document.getElementById('maxBudget');
-                budgetInput.value = formatWithSpaces(Math.floor(characterData.wallet));
+                // Convert to millions for the input field
+                budgetInput.value = Math.floor(characterData.wallet / 1000000);
                 loadTrades();
                 
                 showButtonFeedback('btnSyncWallet');
@@ -2148,16 +2389,77 @@
             if (!trade) return;
             
             selectedDeal = trade;
+            selectedDeal.route_warning = null; // Reset warning
             updateSelectedDealUI();
             updateActionButtons();
             
             // Re-render to show selection
             renderTrades(allTradesCache);
+            
+            // Check route security in background
+            checkRouteSecurity(trade);
+        }
+        
+        async function checkRouteSecurity(trade) {
+            if (!trade.from_system_id || !trade.to_system_id) return;
+            
+            try {
+                const routeFlag = document.getElementById('routeFlag').value || 'secure';
+                const response = await fetch('/api/check_route_security', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        from_system: trade.from_system_id,
+                        to_system: trade.to_system_id,
+                        route_flag: routeFlag
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (selectedDeal && selectedDeal.from_system_id === trade.from_system_id) {
+                    selectedDeal.route_warning = data;
+                    updateRouteWarning(data);
+                }
+            } catch (e) {
+                console.error('Failed to check route security:', e);
+            }
+        }
+        
+        function updateRouteWarning(data) {
+            const warningEl = document.getElementById('routeWarning');
+            if (!warningEl) return;
+            
+            if (!data) {
+                warningEl.style.display = 'none';
+                warningEl.innerHTML = '';
+                warningEl.className = 'route-warning';
+            } else if (data.safe) {
+                warningEl.style.display = 'block';
+                warningEl.className = 'route-warning safe';
+                warningEl.innerHTML = `<span class="safe-icon">[OK]</span> Route is safe (highsec only)`;
+            } else {
+                const systems = data.dangerous_systems || [];
+                const names = systems.map(s => `${s.name} (${s.security})`).join(', ');
+                warningEl.style.display = 'block';
+                warningEl.className = 'route-warning danger';
+                warningEl.innerHTML = `<span class="warning-icon">[!]</span> Route passes through: ${names}`;
+            }
+        }
+        
+        function clearRouteWarning() {
+            const warningEl = document.getElementById('routeWarning');
+            if (warningEl) {
+                warningEl.style.display = 'none';
+                warningEl.innerHTML = '';
+                warningEl.className = 'route-warning';
+            }
         }
 
         function updateSelectedDealUI() {
             const content = document.getElementById('selectedDealContent');
             const clearBtn = document.getElementById('btnClearDeal');
+            const quickActionsCard = document.getElementById('quickActionsCard');
             
             if (!selectedDeal) {
                 content.innerHTML = `
@@ -2167,12 +2469,16 @@
                     </div>
                 `;
                 if (clearBtn) clearBtn.classList.remove('visible');
+                if (quickActionsCard) quickActionsCard.style.display = 'none';
+                clearRouteWarning();
                 return;
             }
             
             if (clearBtn) clearBtn.classList.add('visible');
+            if (quickActionsCard) quickActionsCard.style.display = 'block';
             
             const d = selectedDeal;
+            const volume = d.volume_m3 || (d.amount * (d.volume_per_unit || 0.01));
             content.innerHTML = `
                 <div class="deal-item-name">${d.type_name}</div>
                 <div class="deal-route">
@@ -2186,44 +2492,51 @@
                 </div>
                 <div class="deal-stats">
                     <div class="deal-stat">
-                        <div class="deal-stat-value">${formatNumber(d.profit)}</div>
+                        <div class="deal-stat-value">${formatNumber(d.buy_price)}</div>
+                        <div class="deal-stat-label">Buy Price</div>
+                    </div>
+                    <div class="deal-stat">
+                        <div class="deal-stat-value">${formatNumber(d.sell_price)}</div>
+                        <div class="deal-stat-label">Sell Price</div>
+                    </div>
+                    <div class="deal-stat">
+                        <div class="deal-stat-value profit">${formatNumber(d.profit)}</div>
                         <div class="deal-stat-label">Profit</div>
-                    </div>
-                    <div class="deal-stat">
-                        <div class="deal-stat-value">${d.jumps}</div>
-                        <div class="deal-stat-label">Jumps</div>
-                    </div>
-                    <div class="deal-stat">
-                        <div class="deal-stat-value">${d.trips}</div>
-                        <div class="deal-stat-label">Trips</div>
                     </div>
                 </div>
                 <div class="deal-stats">
                     <div class="deal-stat">
                         <div class="deal-stat-value">${formatNumber(d.cost)}</div>
-                        <div class="deal-stat-label">Cost</div>
+                        <div class="deal-stat-label">Total Cost</div>
                     </div>
                     <div class="deal-stat">
                         <div class="deal-stat-value">${formatAmountCompact(d.amount)}</div>
                         <div class="deal-stat-label">Amount</div>
                     </div>
                     <div class="deal-stat">
-                        <div class="deal-stat-value">${formatTime(d.time_seconds)}</div>
-                        <div class="deal-stat-label">Est. Time</div>
+                        <div class="deal-stat-value">${formatAmountCompact(volume)} m³</div>
+                        <div class="deal-stat-label">Volume</div>
+                    </div>
+                </div>
+                <div class="deal-stats">
+                    <div class="deal-stat">
+                        <div class="deal-stat-value">${d.trips}</div>
+                        <div class="deal-stat-label">Trips</div>
+                    </div>
+                    <div class="deal-stat">
+                        <div class="deal-stat-value">${d.jumps}</div>
+                        <div class="deal-stat-label">Jumps</div>
+                    </div>
+                    <div class="deal-stat">
+                        <div class="deal-stat-value">${formatNumber(d.profit_per_jump)}</div>
+                        <div class="deal-stat-label">ISK/Jump</div>
                     </div>
                 </div>
             `;
         }
 
         function updateActionButtons() {
-            const hasSelection = selectedDeal !== null;
-            
-            document.getElementById('btnSetBuyDest').disabled = !hasSelection || !isLoggedIn;
-            document.getElementById('btnSetSellDest').disabled = !hasSelection || !isLoggedIn;
-            document.getElementById('btnOpenMarket').disabled = !hasSelection || !isLoggedIn;
-            document.getElementById('btnOpenInfo').disabled = !hasSelection || !isLoggedIn;
-            document.getElementById('btnStartDeal').disabled = !hasSelection || !isLoggedIn;
-            document.getElementById('btnClearDeal').disabled = !hasSelection;
+            // Quick Actions card visibility is now handled in updateSelectedDealUI
         }
 
         function clearDeal() {
@@ -2399,3 +2712,4 @@
     </script>
 </body>
 </html>
+
