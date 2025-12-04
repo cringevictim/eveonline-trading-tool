@@ -395,11 +395,18 @@
         
         .login-inline {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            gap: 15px;
-            font-size: 0.85rem;
+            gap: 12px;
+            padding: 62px 15px 30px 15px;
+            text-align: center;
+        }
+        
+        .login-inline span {
+            font-size: 0.8rem;
             color: var(--text-muted);
+            order: 2;
         }
         
         .login-btn-inline {
@@ -1385,8 +1392,8 @@
                         <span class="panel-title">Character</span>
                     </div>
                     <div class="login-inline">
-                        <span>Login to sync wallet, set destinations & more</span>
-                        <a href="/login" class="login-btn-inline">&gt; Login with EVE</a>
+                        <span>Login to sync wallet, set destinations & more!</span>
+                        <a href="/login" class="login-btn-inline">Login with EVE</a>
                     </div>
                 </div>
                 {% endif %}
@@ -1394,7 +1401,7 @@
                 <!-- Market Settings Panel (Right Half) -->
                 <div class="control-panel">
                     <div class="panel-header">
-                        <span class="panel-title">Market Settings</span>
+                        <span class="panel-title">Search Options</span>
                     </div>
                     <div class="form-grid">
                         <div class="form-group">
@@ -1835,6 +1842,15 @@
             allTradesCache = [];
             renderTrades([]);
             
+            // Reset data age timer for new scan
+            lastUpdatedTimestamp = null;
+            if (dataAgeInterval) {
+                clearInterval(dataAgeInterval);
+                dataAgeInterval = null;
+            }
+            document.getElementById('dataAge').textContent = '-';
+            document.getElementById('dataAgeBlock').className = 'stat data-age';
+            
             const response = await fetch('/api/scan', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1901,8 +1917,8 @@
                 document.getElementById('tradesCount').textContent = formatNumber(data.trades);
                 document.getElementById('routesCount').textContent = formatNumber(data.cached_routes);
 
-                // Track when data was last updated
-                if (data.last_updated) {
+                // Track when data was last updated (only set once per scan, and only if there's data)
+                if (data.last_updated && !lastUpdatedTimestamp && (data.orders > 0 || data.trades > 0)) {
                     lastUpdatedTimestamp = data.last_updated;
                     updateDataAge();
                     
@@ -2367,22 +2383,35 @@
         // ========== Sync Functions ==========
 
         async function syncWallet() {
-            if (!isLoggedIn) return;
+            if (!isLoggedIn) {
+                showButtonFeedback('btnSyncWallet', 'Login first', true);
+                return;
+            }
             
-            await loadCharacterStatus();
-            
-            if (characterData && characterData.wallet) {
-                const budgetInput = document.getElementById('maxBudget');
-                // Convert to millions for the input field
-                budgetInput.value = Math.floor(characterData.wallet / 1000000);
-                loadTrades();
+            try {
+                await loadCharacterStatus();
                 
-                showButtonFeedback('btnSyncWallet');
+                if (characterData && characterData.wallet) {
+                    const budgetInput = document.getElementById('maxBudget');
+                    // Convert to millions for the input field
+                    budgetInput.value = Math.floor(characterData.wallet / 1000000);
+                    loadTrades();
+                    
+                    showButtonFeedback('btnSyncWallet', 'OK');
+                } else {
+                    showButtonFeedback('btnSyncWallet', 'No data', true);
+                }
+            } catch (e) {
+                console.error('Failed to sync wallet:', e);
+                showButtonFeedback('btnSyncWallet', 'Error', true);
             }
         }
 
         async function syncCargo() {
-            if (!isLoggedIn) return;
+            if (!isLoggedIn) {
+                showButtonFeedback('btnSyncCargo', 'Login first', true);
+                return;
+            }
             
             try {
                 const response = await fetch('/api/character/ship');
@@ -2393,10 +2422,13 @@
                     cargoInput.value = formatWithSpaces(Math.floor(data.cargo));
                     loadTrades();
                     
-                    showButtonFeedback('btnSyncCargo');
+                    showButtonFeedback('btnSyncCargo', 'OK');
+                } else {
+                    showButtonFeedback('btnSyncCargo', 'No data', true);
                 }
             } catch (e) {
                 console.error('Failed to sync cargo:', e);
+                showButtonFeedback('btnSyncCargo', 'Error', true);
             }
         }
 
@@ -2408,6 +2440,16 @@
                     renderTrades([]);
                     selectedDeal = null;
                     updateSelectedDealUI();
+                    
+                    // Reset data age timer
+                    lastUpdatedTimestamp = null;
+                    if (dataAgeInterval) {
+                        clearInterval(dataAgeInterval);
+                        dataAgeInterval = null;
+                    }
+                    document.getElementById('dataAge').textContent = '-';
+                    document.getElementById('dataAgeBlock').className = 'stat data-age';
+                    
                     showButtonFeedback('btnClearDB');
                 }
             } catch (e) {
@@ -2415,12 +2457,16 @@
             }
         }
 
-        function showButtonFeedback(btnId) {
+        function showButtonFeedback(btnId, message = 'OK', isError = false) {
             const btn = document.getElementById(btnId);
             if (btn) {
                 const original = btn.innerHTML;
-                btn.innerHTML = 'OK';
-                btn.style.background = 'var(--profit)';
+                btn.innerHTML = message;
+                if (isError) {
+                    btn.style.background = 'var(--danger)';
+                } else {
+                    btn.style.background = 'var(--profit)';
+                }
                 btn.style.color = 'var(--bg-dark)';
                 setTimeout(() => {
                     btn.innerHTML = original;
@@ -2529,7 +2575,7 @@
             if (quickActionsCard) quickActionsCard.style.display = 'block';
             
             const d = selectedDeal;
-            const volume = d.volume_m3 || (d.amount * (d.volume_per_unit || 0.01));
+            const volume = Math.round(d.volume_m3 || (d.amount * (d.volume_per_unit || 0.01)));
             content.innerHTML = `
                 <div class="deal-item-name">${d.type_name}</div>
                 <div class="deal-route">

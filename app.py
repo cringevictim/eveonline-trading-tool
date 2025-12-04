@@ -361,6 +361,8 @@ def clear_db():
     from database import clear_orders, clear_trades
     clear_orders()
     clear_trades()
+    # Reset scanner's last_updated timestamp
+    scanner.last_updated = None
     return jsonify({'status': 'cleared'})
 
 

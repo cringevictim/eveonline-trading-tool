@@ -135,15 +135,22 @@ class MarketScanner:
             # Process items in batches
             batch_size = 5
             for i in range(0, len(all_types), batch_size):
+                # Check if scan was stopped
+                if self.status == 'stopped':
+                    return
+                
                 batch = all_types[i:i+batch_size]
                 tasks = [self.process_item(session, item) for item in batch]
                 await asyncio.gather(*tasks)
                 self.scanned_items += len(batch)
                 self.progress = int((self.scanned_items / self.total_items) * 100)
+                self.last_updated = time.time()  # Update timestamp as data comes in
         
-        self.status = "complete"
-        self.progress = 100
-        self.last_updated = time.time()  # Record when scan completed
+        # Only mark complete if not stopped
+        if self.status != 'stopped':
+            self.status = "complete"
+            self.progress = 100
+            self.last_updated = time.time()  # Final timestamp when scan completed
     
     async def process_item(self, session, item):
         """Process a single item type"""
